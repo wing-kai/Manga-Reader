@@ -1,0 +1,30 @@
+{
+    "name": "manga-reader",
+    "version": "0.0.1",
+    "description": "a mac os x manga reader application",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron main.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wing-kai/Manga-Reader.git"
+    },
+    "keywords": [
+        "Electron",
+        "Manga",
+        "Comic",
+        "Reader",
+        "Study"
+    ],
+    "author": "wing-kai",
+    "license": "CC0 1.0 Universal",
+    "bugs": {
+        "url": "https://github.com/wing-kai/Manga-Reader/issues"
+    },
+    "homepage": "https://github.com/wing-kai/Manga-Reader",
+    "devDependencies": {
+        "electron": "^0.35.4",
+        "electron-prebuilt": "^0.35.0"
+    }
+}
