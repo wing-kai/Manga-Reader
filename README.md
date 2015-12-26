@@ -6,3 +6,11 @@
  - 批量管理：加挂分类、删除
  - 展示：分类展示、统一展示、热度展示、排序展示
  - 个性化设置
+
+# Run this App
+```
+$ npm install -g electron
+$ npm install
+$ gulp
+$ npm start
+```
