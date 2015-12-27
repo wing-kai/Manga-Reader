@@ -17,12 +17,18 @@
             height: 100%;
         }
         
-        body {
+        body > div,
+        body > div > div {
+            height: inherit;
+            width: inherit;
+        }
+        
+        body > div > div {
             display: -webkit-box;
             -webkit-box-orient: vertical;
         }
+
         /*顶部导航栏*/
-        
         .header {
             height: 50px;
             width: 100%;
@@ -44,7 +50,7 @@
             padding: 0;
         }
         
-        .header button span:before {
+        .header button span.line:before {
             content: ' ';
             margin: auto;
             display: block;
@@ -55,7 +61,7 @@
             -webkit-transition: width 200ms ease-in-out;
         }
         
-        .header button:hover span:before {
+        .header button:hover span.line:before {
             width: 60%;
         }
         
@@ -130,62 +136,28 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
-            /*justify-content: flex-start;*/
             overflow: scroll;
             padding: 10px;
         }
         
-        .manga-wrap {
+        .manga-wrap:not(.empty) {
             height: 240px;
             width: 166px;
             background-color: #888;
             margin: 0 10px 20px;
         }
         
-        .cover {
+        .manga-wrap.empty {
             height: 240px;
             width: 166px;
-            background-color: #fff;
+            background-color: transparent;
             margin: 0 10px 20px;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <center>
-            <button>所有漫画<span></span></button>
-            <button>分类<span></span></button>
-            <button>其它<span></span></button>
-        </center>
-    </div>
-    <div class="main-content">
-        <nav class='navigation'>
-            <div class='title'>分类</div>
-            <ul>
-                <li class="selected">分类</li>
-                <li>分类</li>
-                <li>分类</li>
-                <li>分类</li>
-                <li>分类</li>
-            </ul>
-            <footer>
-                <button>新增</button>
-                <button>设置</button>
-            </footer>
-        </nav>
-        <div class="container">
-            <div class="book-list">
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-                <div class="manga-wrap"></div>
-            </div>
-        </div>
-    </div>
-    <script src='../js/components/index.js'></script>
+    <div class="body"></div>
+    <script>require('../js/components/app.js')</script>
 </body>
 </html>

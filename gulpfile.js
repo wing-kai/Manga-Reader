@@ -17,9 +17,9 @@ var onError = function (err) {
 };
 
 const PATH = {
-    SCRIPT: ['src/***/***/***/*.js', 'src/***/***/***/*.jsx', 'src/***/*.js', 'src/*.js'],
-    HTML: ['src/***/***/*.html'],
-    CSS: ['src/***/***/*.css']
+    SCRIPT: ['src/**/*.js', 'src/**/*.jsx'],
+    HTML: ['src/**/*.html'],
+    CSS: ['src/**/*.css']
 }
 
 gulp.task('css', function() {
