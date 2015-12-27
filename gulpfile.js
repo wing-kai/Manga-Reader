@@ -18,8 +18,13 @@ var onError = function (err) {
 
 const PATH = {
     SCRIPT: ['src/***/***/***/*.js', 'src/***/***/***/*.jsx', 'src/***/*.js', 'src/*.js'],
-    HTML: ['src/***/***/*.html']
+    HTML: ['src/***/***/*.html'],
+    CSS: ['src/***/***/*.css']
 }
+
+gulp.task('css', function() {
+   gulp.src(PATH.CSS).pipe(minifyCss()).pipe(gulp.dest('asset'));
+});
 
 gulp.task('html', function () {
     gulp.src(PATH.HTML).pipe(gulp.dest('asset'));
@@ -39,7 +44,8 @@ gulp.task('script', function () {
 
 gulp.task('watch', function () {
     gulp.watch(PATH.SCRIPT, ['script']);
+    gulp.watch(PATH.CSS, ['css']);
     gulp.watch(PATH.HTML, ['html']);
 });
 
-gulp.task('default', ['html', 'script', 'watch']);
+gulp.task('default', ['html', 'script', 'css', 'watch']);

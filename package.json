@@ -1,5 +1,6 @@
 {
     "name": "manga-reader",
+    "productName": "manga-reader",
     "version": "0.0.1",
     "description": "a mac os x manga reader application",
     "main": "main.js",
