@@ -2,7 +2,7 @@
 
 const gulp = require('gulp');
 const babel = require('gulp-babel'); //编译es6
-const minifyCss = require('gulp-minify-css'); //css压缩
+// const minifyCss = require('gulp-minify-css'); //css压缩
 const del = require('del');
 const plumber = require('gulp-plumber');
 const notify = require('gulp-notify');
@@ -23,7 +23,7 @@ const PATH = {
 }
 
 gulp.task('css', function() {
-   gulp.src(PATH.CSS).pipe(minifyCss()).pipe(gulp.dest('asset'));
+//    gulp.src(PATH.CSS).pipe(minifyCss()).pipe(gulp.dest('asset'));
 });
 
 gulp.task('html', function () {

@@ -2,11 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Link, IndexRoute, Redirect } from 'react-router';
 import { createHashHistory } from 'history';
-import Flux from '../lib/flux/index';
 
 import { remote, ipcRenderer } from 'electron';
 
-import Home from '../components/index_component';
+import Main from '../components/index_component';
+import BookList from '../components/book_list_component';
+import Reader from '../components/reader_component';
+
+let Body = (
+    <Router history={createHashHistory()}>
+        <Route path='/' component={Main}>
+            <IndexRoute component={BookList} />
+            <Route path='reader' component={Reader} />
+        </Route>
+    </Router>
+)
+
+ReactDOM.render(Body, document.querySelector('.body'));
 
 const { Menu } = remote;
 const ipc = ipcRenderer;
@@ -62,11 +74,3 @@ const menu = Menu.buildFromTemplate([{
 }]);
 
 Menu.setApplicationMenu(menu);
-
-let Body = (
-    <Router history={createHashHistory()}>
-        <Route path='/' component={Home} />
-    </Router>
-)
-
-ReactDOM.render(Body, document.querySelector('.body'));
