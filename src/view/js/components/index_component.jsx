@@ -85,7 +85,7 @@ class Main extends Component {
     
     render() {
         return (
-            <div>
+            <div className="home">
                 <Header />
                 <div className="main-content">
                     <Sidebar />

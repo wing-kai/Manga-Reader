@@ -28,6 +28,6 @@ class BookList extends Component {
     }
 }
 
-BookList.contextTypes = indexContextType
+BookList.contextTypes = Object.assign({}, indexContextType);
 
 export default BookList

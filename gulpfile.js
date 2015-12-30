@@ -2,7 +2,7 @@
 
 const gulp = require('gulp');
 const babel = require('gulp-babel'); //编译es6
-// const minifyCss = require('gulp-minify-css'); //css压缩
+const minifyCss = require('gulp-minify-css'); //css压缩
 const del = require('del');
 const plumber = require('gulp-plumber');
 const notify = require('gulp-notify');
@@ -19,11 +19,16 @@ var onError = function (err) {
 const PATH = {
     SCRIPT: ['src/**/*.js', 'src/**/*.jsx'],
     HTML: ['src/**/*.html'],
-    CSS: ['src/**/*.css']
+    CSS: ['src/**/*.css'],
+    IMG: ['src/**/*.png', 'src/**/*.jpg', 'src/**/*.svg', 'src/**/*.gif', 'src/**/*.bmp']
 }
 
 gulp.task('css', function() {
-//    gulp.src(PATH.CSS).pipe(minifyCss()).pipe(gulp.dest('asset'));
+   gulp.src(PATH.CSS).pipe(minifyCss()).pipe(gulp.dest('asset'));
+});
+
+gulp.task('img', function() {
+    gulp.src(PATH.IMG).pipe(gulp.dest('asset'));
 });
 
 gulp.task('html', function () {
@@ -48,4 +53,4 @@ gulp.task('watch', function () {
     gulp.watch(PATH.HTML, ['html']);
 });
 
-gulp.task('default', ['html', 'script', 'css', 'watch']);
+gulp.task('default', ['html', 'script', 'css', 'img', 'watch']);

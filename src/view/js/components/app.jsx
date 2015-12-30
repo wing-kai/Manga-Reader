@@ -13,8 +13,8 @@ let Body = (
     <Router history={createHashHistory()}>
         <Route path='/' component={Main}>
             <IndexRoute component={BookList} />
-            <Route path='reader' component={Reader} />
         </Route>
+        <Route path='/reader' component={Reader} />
     </Router>
 )
 
