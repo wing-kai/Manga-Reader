@@ -6,6 +6,7 @@ import { createHashHistory } from 'history';
 import { remote, ipcRenderer } from 'electron';
 
 import Main from '../components/index_component';
+import ImportManage from '../components/import_manage_component';
 import BookList from '../components/book_list_component';
 import Reader from '../components/reader_component';
 
@@ -13,6 +14,7 @@ let Body = (
     <Router history={createHashHistory()}>
         <Route path='/' component={Main}>
             <IndexRoute component={BookList} />
+            <Route path='import' component={ImportManage} />
         </Route>
         <Route path='/reader' component={Reader} />
     </Router>
@@ -73,4 +75,4 @@ const menu = Menu.buildFromTemplate([{
     }, ]
 }]);
 
-Menu.setApplicationMenu(menu);
+// Menu.setApplicationMenu(menu);

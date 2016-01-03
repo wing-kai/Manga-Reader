@@ -26,6 +26,10 @@ class BookList extends Component {
             </div>
         )
     }
+    
+    componentDidMount() {
+        this.context.showSideBar();
+    }
 }
 
 BookList.contextTypes = Object.assign({}, indexContextType);

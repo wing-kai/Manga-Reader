@@ -1,0 +1,69 @@
+button.import-new-manga {
+    background-color: transparent;
+    border: dashed 2px #fff;
+    border-radius: 10px;
+    height: 131px;
+    width: 200px;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.container.import-manage-add {
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.import-manage-edit {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    overflow: scroll;
+    padding: 10px;
+}
+
+.new-manga-wrap {
+    height: 200px;
+    width: 140px;
+    margin: 5px;
+    background-color: #333;
+    position: relative;
+}
+
+.new-manga-wrap.continue-add {
+    height: 198px;
+    width: 138px;
+    background-color: transparent;
+    border: dashed 1px #fff;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.new-manga-wrap button.delete {
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    background-color: red;
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    right: 0;
+    top: 0;
+    transform: translate(8px, -8px);
+    display: none;
+    cursor: pointer;
+}
+
+.new-manga-wrap:hover button.delete,
+.new-manga-wrap button.delete:hover {
+    display: block;
+}
+
+.new-manga-wrap.empty {
+    visibility: hidden;
+}

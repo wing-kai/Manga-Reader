@@ -1,6 +1,9 @@
 const getAction = (Flux) => (
     Flux.createAction((next) => ({
-        toggleSidebar() {
+        showSideBar() {
+            next()
+        },
+        hideSideBar() {
             next()
         }
     }))

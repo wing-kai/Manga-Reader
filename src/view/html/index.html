@@ -4,7 +4,10 @@
 <head>
     <meta charset="utf-8">
     <title>Manga Reader</title>
-    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/reader.css" />
+    <link rel="stylesheet" href="../css/navigation.css" />
+    <link rel="stylesheet" href="../css/import_manage.css" />
     <style>
         html,
         body {
@@ -23,33 +26,42 @@
         }
         
         .home {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
+            display: flex;
+            flex-direction: column;
         }
 
         /*顶部导航栏*/
-        .header {
-            height: 50px;
-            width: 100%;
+        .home > header {
             background-color: #444;
+            flex-basis: 50px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
-        
-        .header button {
+
+        .home > header button {
             outline: none;
             width: 150px;
             height: 40px;
             border: none;
             background-color: transparent;
             color: #fff;
-            cursor: pointer;
             margin: 0;
             padding: 0;
+            align-items: flex-start;
+            text-align: center;
+            box-sizing: border-box;
+            display: inline-block;
+            font: 11px BlinkMacSystemFont;
+            text-decoration: none;
         }
         
-        .header button span.line:before {
+        .home > header button a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .home > header button span.line:before {
             content: ' ';
             margin: auto;
             display: block;
@@ -59,75 +71,15 @@
             transition: width 200ms ease-in-out;
             -webkit-transition: width 200ms ease-in-out;
         }
-        
-        .header button:hover span.line:before {
+
+        .home > header button a:hover + span.line:before {
             width: 60%;
         }
         
         .main-content {
-            -webkit-box-flex: 1;
-            display: -webkit-box;
-            -webkit-box-orient: horizontal;
-            width: 100%;
-        }
-        /*侧边栏*/
-        
-        nav.navigation {
-            cursor: default;
-            background: #373737;
-            width: 200px;
-            position: relative;
-        }
-        
-        nav.navigation .title {
-            font-size: 14px;
-            height: 40px;
-            color: #B9B9B9;
+            flex: 1;
             display: flex;
-            align-items: flex-end;
-            margin: 0 10px 5px;
-        }
-        
-        nav.navigation ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        nav.navigation ul li {
-            height: 25px;
-            font-size: 12px;
-            color: #fff;
-            padding: 0 30px;
-            display: flex;
-            align-items: center;
-        }
-        
-        nav.navigation ul li.selected {
-            background-color: #464646;
-        }
-        
-        nav.navigation footer {
-            position: absolute;
-            bottom: 0;
-            height: 40px;
-            border-top: solid 1px #6f6f6f;
-            width: 100%;
-            display: flex;
-            align-items: center;
-        }
-        
-        nav.navigation footer button {
-            background-color: transparent;
-            margin-left: 10px;
-            border: solid 1px #aaa;
-            border-radius: 5px;
-            color: #aaa;
-        }
-        
-        .container {
-            -webkit-box-flex: 1;
-            overflow: scroll;
+            /*justify-content: space-around;*/
         }
         
         .book-list {
@@ -138,7 +90,7 @@
             padding: 10px;
         }
         
-        .manga-wrap:not(.empty) {
+        .manga-wrap {
             height: 240px;
             width: 166px;
             background-color: #888;
@@ -146,91 +98,12 @@
         }
         
         .manga-wrap.empty {
-            height: 240px;
-            width: 166px;
-            background-color: transparent;
-            margin: 0 10px 20px;
+            visibility: hidden;
         }
         
-        /*阅读器*/
-        
-        .control-bar {
-            height: 50px;
-            width: 400px;
-            padding: 0 20px;
-            background-color: #555;
-            position: absolute;
-            bottom: 50px;
-            border-radius: 25px;
-            left: 50%;
-            transform: translateX(-220px);
-            -webkit-transform: translateX(-220px);
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-        }
-        
-        .control-bar .btn {
-            align-items: flex-start;
-            line-height: 23px;
-            margin: 0;
-            box-sizing: border-box;
-            text-rendering: auto;
-            padding: 2px 6px 3px;
-            text-transform: none;
-            display: inline-block;
-            text-indent: 0;
-            text-align: center;
-            color: #fff;
-            background-color: transparent;
-            border-radius: 5px;
-            border: solid 1px #ccc;
-            height: 30px;
-            text-decoration: none;
-            font-size: 11px;
-        }
-        
-        .control-bar input {
-            border: solid 1px #ccc;
-            background-color: transparent;
-            width: 50px;
-            height: 30px;
-            text-align: center;
-            color: #fff;
-            font-size: 20px;
-            text-align: center;
-            color: #fff;
-            font-size: 20px;
-        }
-        
-        .page-container {
-            height: inherit;
-            width: inherit;
-            display: flex;
-            align-items: center;
-            overflow: auto;
-        }
-        
-        .page-container .wrap.default {
-            height: inherit;
-            width: inherit;
-            text-align: center;
-        }
-        
-        .page-container .wrap.default > img {
-            height: inherit;
-            width: auto;
-        }
-        
-        .page-container .wrap.double {
-            width: inherit;
-        }
-        .page-container .wrap.double > img {
-            height: 100%;
-        }
-        
-        .page-container .wrap.waterfall {
-            
+        .container {
+            overflow: scroll;
+            flex: 1;
         }
     </style>
 </head>

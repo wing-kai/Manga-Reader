@@ -2,7 +2,8 @@ let Store = {}
 
 const getStore = (Flux) => (
     Flux.createStore((next) => ({
-        toggleSidebar: () => 1
+        showSideBar: () => true,
+        hideSideBar: () => false
     }))
 )
 

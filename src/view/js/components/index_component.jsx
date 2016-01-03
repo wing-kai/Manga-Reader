@@ -22,7 +22,7 @@ class Sidebar extends Component {
 
     render() {
         return (
-            <nav className='navigation' style={{display: this.state.show ? 'block' : 'none'}}>
+            <nav className='navigation' style={{display: this.state.show ? 'flex' : 'none'}}>
                 <div className='title'>分类</div>
                 <ul>
                     <li className="selected">分类</li>
@@ -32,8 +32,8 @@ class Sidebar extends Component {
                     <li>分类</li>
                 </ul>
                 <footer>
-                    <button>新增</button>
-                    <button>设置</button>
+                    <Link className='btn' to="/import">新增</Link>
+                    <button className='btn'>设置</button>
                 </footer>
             </nav>
         )
@@ -41,45 +41,47 @@ class Sidebar extends Component {
     
     componentDidMount() {
         this.storeListeners = Store.listen({
-            toggleSidebar: this.handleToggleSidebar.bind(this)
+            showSideBar: this.handleToggleSidebar.bind(this),
+            hideSideBar: this.handleToggleSidebar.bind(this)
         });
     }
     
-    handleToggleSidebar() {
-        this.setState({
-            show: !this.state.show
-        })
+    componentWillUnmount() {
+         Store.listenOff(this.storeListeners);
+    }
+    
+    handleToggleSidebar(show = false) {
+        this.setState({ show });
     }
 }
 
 class Header extends Component {
     render() {
         return (
-            <div className="header">
-                <center>
-                    <button>
-                        所有漫画
-                        <span className='line'></span>
-                    </button>
-                    <button>
-                        分类
-                        <span className='line'></span>
-                    </button>
-                    <button>
-                        其它
-                        <span className='line'></span>
-                    </button>
-                </center>
-            </div>
+            <header>
+                <button>
+                    <Link to='/'>所有漫画</Link>    
+                    <span className='line'></span>
+                </button>
+                <button>
+                    <Link to='/'>分类</Link>
+                    <span className='line'></span>
+                </button>
+                <button>
+                    <Link to='/'>其它</Link>
+                    <span className='line'></span>
+                </button>
+            </header>
         )
     }
 }
 
 class Main extends Component {
-    
+
     getChildContext() {
         return {
-            toggleSidebar: Action.toggleSidebar
+            showSideBar: Action.showSideBar,
+            hideSideBar: Action.hideSideBar
         }
     }
     
