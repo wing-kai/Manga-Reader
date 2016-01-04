@@ -1,25 +1,44 @@
 import React from 'react'
 import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
 import { ipcRenderer } from 'electron'
+import EasyFlux from '../lib/flux/index'
 
 import indexContextType from './index_context_type'
+import getAction from './import_manage_action'
+import getStore from './import_manage_store'
 
 const { Component } = React
+
+const Flux = new EasyFlux({ dev: true })
+const Action = getAction(Flux)
+const Store = getStore(Flux)
 
 class ImportManage extends Component {
     
     constructor(props) {
         super(props);
-        this.state = {}
+        this.state = {
+            importing: false
+        }
     }
     
     render() {
-        
+
+        const thisState = this.state;
+
         return (
             <div className="container import-manage-add">
-                <button className="import-new-manga" onClick={this.handleClickUploadBtn.bind(this)}>
-                    添加<br/>新漫画
-                </button>
+                {
+                    thisState.importing ? (
+                        <button className="import-new-manga" disabled={true}>
+                            导入中
+                        </button>
+                    ) : (
+                        <button className="import-new-manga" onClick={this.handleClickUploadBtn.bind(this)}>
+                            添加<br/>新漫画
+                        </button>
+                    )
+                }
             </div>
         )
 
@@ -61,11 +80,15 @@ class ImportManage extends Component {
     }
     
     componentDidMount() {
-        console.log(ipcRenderer);
         this.context.hideSideBar();
+        this.storeListener = Store.listen({
+            getMangaInfo: this.handleMangaInfo.bind(this)
+        });
     }
     
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        Store.listenOff(this.storeListener);
+    }
     
     handleClickUploadBtn() {
         ipcRenderer.once('show-directory-selector-reply', this.handleSelectedDirectory.bind(this));
@@ -73,7 +96,17 @@ class ImportManage extends Component {
     }
     
     handleSelectedDirectory(event, selectedDirectories) {
-        console.log(selectedDirectories);
+        this.setState({
+            importing: true
+        }, () => {
+            Action.getMangaInfo(selectedDirectories);
+        });
+    }
+    
+    handleMangaInfo(str) {
+        this.setState({
+            importing: false
+        })
     }
 }
 

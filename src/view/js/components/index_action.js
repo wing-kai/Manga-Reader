@@ -1,5 +1,5 @@
 const getAction = (Flux) => (
-    Flux.createAction((next) => ({
+    Flux.createAction( next => ({
         showSideBar() {
             next()
         },

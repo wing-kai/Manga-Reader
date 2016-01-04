@@ -9,7 +9,7 @@ const { Component } = React
 
 const Flux = new EasyFlux()
 const Action = getAction(Flux)
-const Store = getStore(Flux) 
+const Store = getStore(Flux)
 
 class Sidebar extends Component {
 

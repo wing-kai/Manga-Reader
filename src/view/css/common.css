@@ -22,3 +22,7 @@
     border-radius: 5px;
     color: #aaa;
 }
+
+button:disabled {
+    cursor: not-allowed;
+}

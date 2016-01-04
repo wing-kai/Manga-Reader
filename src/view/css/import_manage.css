@@ -6,6 +6,9 @@ button.import-new-manga {
     width: 200px;
     color: #fff;
     font-size: 20px;
+}
+
+button.import-new-manga:not(:disabled) {
     cursor: pointer;
 }
 

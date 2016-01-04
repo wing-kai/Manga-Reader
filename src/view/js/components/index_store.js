@@ -1,7 +1,7 @@
 let Store = {}
 
-const getStore = (Flux) => (
-    Flux.createStore((next) => ({
+const getStore = Flux => (
+    Flux.createStore( next => ({
         showSideBar: () => true,
         hideSideBar: () => false
     }))
