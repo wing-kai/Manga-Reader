@@ -34,6 +34,7 @@
     "gulp-rename": "^1.2.2"
   },
   "dependencies": {
+    "crypto": "0.0.3",
     "gulp-minify-css": "^1.2.3",
     "react": "^0.14.3",
     "react-dom": "^0.14.3",

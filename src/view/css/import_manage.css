@@ -33,6 +33,13 @@ button.import-new-manga:not(:disabled) {
     margin: 5px;
     background-color: #333;
     position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.new-manga-wrap img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .new-manga-wrap.continue-add {

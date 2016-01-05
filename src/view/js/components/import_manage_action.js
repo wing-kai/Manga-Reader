@@ -22,7 +22,7 @@ const getAction = Flux => (
                         let cover;
                         const hasImg = dirContent.some( fileName => {
                             cover = fileName;
-                            return REGEXP.IMAGE_FILE.test(fileName)
+                            return REGEXP.IMAGE_FILE.test(fileName) && fs.statSync(directories[i]+ '/' + fileName).isFile()
                         } );
 
                         return hasImg ? {
@@ -33,6 +33,10 @@ const getAction = Flux => (
                     }).filter(item => item !== null)
                 )
             });
+        },
+        
+        deleteManga(hash) {
+            next(hash)
         }
     }))
 )

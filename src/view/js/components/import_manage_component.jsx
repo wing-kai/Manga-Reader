@@ -18,7 +18,8 @@ class ImportManage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            importing: false
+            importing: false,
+            firstLoad: true
         }
     }
     
@@ -26,46 +27,40 @@ class ImportManage extends Component {
 
         const thisState = this.state;
 
-        return (
-            <div className="container import-manage-add">
-                {
-                    thisState.importing ? (
-                        <button className="import-new-manga" disabled={true}>
-                            导入中
-                        </button>
-                    ) : (
-                        <button className="import-new-manga" onClick={this.handleClickUploadBtn.bind(this)}>
-                            添加<br/>新漫画
-                        </button>
-                    )
-                }
-            </div>
-        )
+        if (thisState.firstLoad) {
+            return (
+                <div className="container import-manage-add">
+                    {
+                        thisState.importing ? (
+                            <button className="import-new-manga" disabled={true}>
+                                导入中
+                            </button>
+                        ) : (
+                            <button className="import-new-manga" onClick={this.handleClickUploadBtn.bind(this)}>
+                                添加<br/>新漫画
+                            </button>
+                        )
+                    }
+                </div>
+            )            
+        }
+        
+        const newMangaList = Store.getNewMangaList();
+        const that = this;
 
         return (
             <div className="container">
                 <div className="import-manage-edit">
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
-                    <div className="new-manga-wrap">
-                        <button className="delete"></button>
-                    </div>
+                    {
+                        newMangaList.map( ({ hash, cover, path, title }) => {
+                            return (
+                                <div className="new-manga-wrap" key={hash}>
+                                    <img src={path + '/' + cover} alt={title} title={title} />
+                                    <button className="delete" title='删除漫画' onClick={this.handleClickDeleteBtn.bind(that, hash)}></button>
+                                </div>
+                            )
+                        })
+                    }
                     <div className="new-manga-wrap continue-add" onClick={this.handleClickUploadBtn.bind(this)}>
                         继续添加
                     </div>
@@ -82,7 +77,8 @@ class ImportManage extends Component {
     componentDidMount() {
         this.context.hideSideBar();
         this.storeListener = Store.listen({
-            getMangaInfo: this.handleMangaInfo.bind(this)
+            getMangaInfo: this.handleGetMangaInfo.bind(this),
+            deleteManga: this.handleDeletedManga.bind(this)
         });
     }
     
@@ -96,17 +92,35 @@ class ImportManage extends Component {
     }
     
     handleSelectedDirectory(event, selectedDirectories) {
-        this.setState({
-            importing: true
-        }, () => {
-            Action.getMangaInfo(selectedDirectories);
-        });
+        if (Array.isArray(selectedDirectories)) {
+            this.setState({
+                importing: true
+            }, () => {
+                Action.getMangaInfo(selectedDirectories);
+            });
+        }
+    }
+
+    handleGetMangaInfo(newMangaList = []) {
+
+        let newState = {
+            importing: false
+        }
+
+        if (newMangaList.length)
+            newState.firstLoad = false;
+        else
+            alert('选择的目录里边没有看到漫画内容……');
+
+        this.setState(newState);
     }
     
-    handleMangaInfo(str) {
-        this.setState({
-            importing: false
-        })
+    handleClickDeleteBtn(hash) {
+        Action.deleteManga(hash);
+    }
+    
+    handleDeletedManga({ deletedManga, hasMore }) {
+        this.setState({ firstLoad: !hasMore });
     }
 }
 

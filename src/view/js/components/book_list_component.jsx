@@ -22,6 +22,8 @@ class BookList extends Component {
                     <a className="manga-wrap empty"></a>
                     <a className="manga-wrap empty"></a>
                     <a className="manga-wrap empty"></a>
+                    <a className="manga-wrap empty"></a>
+                    <a className="manga-wrap empty"></a>
                 </div>
             </div>
         )
