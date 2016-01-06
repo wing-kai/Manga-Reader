@@ -1,6 +1,6 @@
 import React from 'react'
 import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
-import EasyFlux from '../lib/flux/index'
+import EasyFlux from 'easy-flux'
 import indexContextType from './index_context_type'
 import getAction from './index_action'
 import getStore from './index_store'

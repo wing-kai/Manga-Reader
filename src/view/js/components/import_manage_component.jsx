@@ -1,7 +1,7 @@
 import React from 'react'
 import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
 import { ipcRenderer } from 'electron'
-import EasyFlux from '../lib/flux/index'
+import EasyFlux from 'easy-flux'
 
 import indexContextType from './index_context_type'
 import getAction from './import_manage_action'

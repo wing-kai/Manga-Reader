@@ -6,7 +6,7 @@ let Store = {
     newMangaList: []
 }
 
-const getStore = (Flux) => (
+const getStore = Flux => (
     Flux.createStore(
         next => ({
             getMangaInfo(directories) {
