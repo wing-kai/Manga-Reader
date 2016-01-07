@@ -1,6 +1,6 @@
 import fs from 'fs';
 import crypto from 'crypto';
-import { clone } from '../modules/util';
+import { clone } from '../../modules/util';
 
 let Store = {
     newMangaList: []

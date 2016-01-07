@@ -1,8 +1,6 @@
 import React from 'react'
 
-const contextType = {
+export const MainContext = {
     showSideBar: React.PropTypes.func,
     hideSideBar: React.PropTypes.func
 }
-
-export default contextType

@@ -1,30 +1,28 @@
 import React from 'react'
-import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
+import { Link } from 'react-router'
 import { ipcRenderer } from 'electron'
 import EasyFlux from 'easy-flux'
 
-import indexContextType from './index_context_type'
-import getAction from './import_manage_action'
-import getStore from './import_manage_store'
-
-const { Component } = React
+import { MainContext } from '../context'
+import getAction from './action'
+import getStore from './store'
 
 const Flux = new EasyFlux({ dev: true })
 const Action = getAction(Flux)
 const Store = getStore(Flux)
 
-class ImportManage extends Component {
+let ImportManage = React.createClass({
     
-    constructor(props) {
-        super(props);
-        this.state = {
+    contextTypes: Object.assign({}, MainContext),
+
+    getInitialState() {
+        return {
             importing: false,
             firstLoad: true
         }
-    }
-    
-    render() {
+    },
 
+    render() {
         const thisState = this.state;
 
         if (thisState.firstLoad) {
@@ -36,7 +34,7 @@ class ImportManage extends Component {
                                 导入中
                             </button>
                         ) : (
-                            <button className="import-new-manga" onClick={this.handleClickUploadBtn.bind(this)}>
+                            <button className="import-new-manga" onClick={this.handleClickUploadBtn}>
                                 添加<br/>新漫画
                             </button>
                         )
@@ -61,7 +59,7 @@ class ImportManage extends Component {
                             )
                         })
                     }
-                    <div className="new-manga-wrap continue-add" onClick={this.handleClickUploadBtn.bind(this)}>
+                    <div className="new-manga-wrap continue-add" onClick={this.handleClickUploadBtn}>
                         继续添加
                     </div>
                     <div className="new-manga-wrap empty"></div>
@@ -71,25 +69,25 @@ class ImportManage extends Component {
                     <div className="new-manga-wrap empty"></div>
                 </div>
             </div>
-        )
-    }
-    
+        )        
+    },
+
     componentDidMount() {
         this.context.hideSideBar();
         this.storeListener = Store.listen({
-            getMangaInfo: this.handleGetMangaInfo.bind(this),
-            deleteManga: this.handleDeletedManga.bind(this)
+            getMangaInfo: this.handleGetMangaInfo,
+            deleteManga: this.handleDeletedManga
         });
-    }
+    },
     
     componentWillUnmount() {
         Store.listenOff(this.storeListener);
-    }
+    },
     
     handleClickUploadBtn() {
-        ipcRenderer.once('show-directory-selector-reply', this.handleSelectedDirectory.bind(this));
+        ipcRenderer.once('show-directory-selector-reply', this.handleSelectedDirectory);
         ipcRenderer.send('show-directory-selector');
-    }
+    },
     
     handleSelectedDirectory(event, selectedDirectories) {
         if (Array.isArray(selectedDirectories)) {
@@ -99,7 +97,7 @@ class ImportManage extends Component {
                 Action.getMangaInfo(selectedDirectories);
             });
         }
-    }
+    },
 
     handleGetMangaInfo(newMangaList = []) {
 
@@ -113,17 +111,15 @@ class ImportManage extends Component {
             alert('选择的目录里边没有看到漫画内容……');
 
         this.setState(newState);
-    }
+    },
     
     handleClickDeleteBtn(hash) {
         Action.deleteManga(hash);
-    }
+    },
     
     handleDeletedManga({ deletedManga, hasMore }) {
         this.setState({ firstLoad: !hasMore });
     }
-}
-
-ImportManage.contextTypes = Object.assign({}, indexContextType)
+});
 
 export default ImportManage

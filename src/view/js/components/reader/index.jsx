@@ -1,25 +1,20 @@
 import React from 'react'
-import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
-import indexContextType from './index_context_type'
-import { VIEW_MODE } from './reader_constants.js'
+import { Link } from 'react-router'
+import { MainContext } from '../context'
+import { VIEW_MODE } from './constants'
 
-const { Component } = React;
-
-class PageContainer extends Component {
-    
-    constructor(props) {
-        super(props);
-        this.state = {
+let PageContainer = React.createClass({
+    getInitialState() {
+        return {
             viewMode: VIEW_MODE.SINGLE,
             imgALoaded: false,
             imgBLoaded: false,
             imgAStyle: {},
-            imgBStyle: {}
-        }
-    }
+            imgBStyle: {}            
+        } 
+    },
 
     render() {
-
         const thisState = this.state;
         let wrapClass = "";
         let wrapContent;
@@ -47,17 +42,17 @@ class PageContainer extends Component {
                 {wrapContent}
                 {this.props.children}
             </div>
-        )
-    }
+        )        
+    },
     
     componentWillUpdate() {
         if (this.state.viewMode !== VIEW_MODE.DOUBLE)
             window.removeEventListener('resize', this.handleScaleImage);
-    }
+    },
     
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleScaleImage);
-    }
+    },
     
     handleImageLoaded(order) {
 
@@ -77,11 +72,11 @@ class PageContainer extends Component {
 
         setState.then(function() {
             if (thisState.imgALoaded === thisState.imgBLoaded === true) {
-                that.handleScaleImage.bind(that)();
+                that.handleScaleImage();
                 window.addEventListener('resize', that.handleScaleImage.bind(that));
             }
         });
-    }
+    },
     
     handleScaleImage() {
 
@@ -112,9 +107,9 @@ class PageContainer extends Component {
             imgBStyle: newImgBStyle
         });
     }
-}
+})
 
-class ControlBar extends Component {
+let ControlBar = React.createClass({
     render() {
         return (
             <div className='control-bar'>
@@ -128,18 +123,17 @@ class ControlBar extends Component {
             </div>
         )
     }
-}
+})
 
-class Reader extends Component {
+let Reader = React.createClass({
+    contextTypes: Object.assign({}, MainContext),
     render() {
         return (
             <PageContainer>
                 <ControlBar />
             </PageContainer>
         )
-    }
-}
-
-Reader.contextTypes = Object.assign({}, indexContextType);
+    }    
+})
 
 export default Reader

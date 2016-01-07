@@ -3,12 +3,10 @@ import ReactDOM from 'react-dom';
 import { Router, Route, Link, IndexRoute, Redirect } from 'react-router';
 import { createHashHistory } from 'history';
 
-import { remote, ipcRenderer } from 'electron';
-
-import Main from '../components/index_component';
-import ImportManage from '../components/import_manage_component';
-import BookList from '../components/book_list_component';
-import Reader from '../components/reader_component';
+import Main from './main';
+import ImportManage from './import_manage';
+import BookList from './book_list';
+import Reader from './reader';
 
 let Body = (
     <Router history={createHashHistory()}>

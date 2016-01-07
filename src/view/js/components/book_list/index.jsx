@@ -1,11 +1,9 @@
 import React from 'react'
-import { Router, Route, Link, IndexRoute, Redirect } from 'react-router'
+import { Link } from 'react-router'
+import { MainContext } from '../context'
 
-import indexContextType from './index_context_type'
-
-const { Component } = React
-
-class BookList extends Component {
+let BookList = React.createClass({
+    contextTypes: Object.assign({}, MainContext),
     render() {
         return (
             <div className="container">
@@ -27,13 +25,11 @@ class BookList extends Component {
                 </div>
             </div>
         )
-    }
+    },
     
     componentDidMount() {
         this.context.showSideBar();
     }
-}
-
-BookList.contextTypes = Object.assign({}, indexContextType);
+});
 
 export default BookList
