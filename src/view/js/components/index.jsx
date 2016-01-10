@@ -16,7 +16,7 @@ let Body = (
             <IndexRoute component={BookList} />
             <Route path='import' component={ImportManage} />
         </Route>
-        <Route path='/reader' component={Reader} />
+        <Route path='/reader/:hashId' component={Reader} />
     </Router>
 )
 

@@ -129,9 +129,11 @@ let ImportManage = React.createClass({
     },
     
     handleSavedInfo(resultPromise) {
+        const thisProps = this.props;
         resultPromise.then(result => {
-            console.log(result);
-        })
+            console.log('新增的漫画:', result);
+            thisProps.history.pushState({}, '/');
+        });
     }
 });
 

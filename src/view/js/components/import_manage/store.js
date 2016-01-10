@@ -11,11 +11,13 @@ const getStore = Flux => (
     Flux.createStore(
         next => ({
             getMangaInfo(directories) {
-                
+
                 // 遍历选中的漫画目录、是否有重复添加，然后再获取每个漫画目录名称的md5值
                 const newMangaInfo = clone(directories).filter(
                     ({ title }) => !Store.newMangaList.some(
                         item => item.title === title
+                    ) && !MangaManage.getMangaListCopy().some(
+                        manga => manga.get("title") === title
                     )
                 ).map( item => {
                     item.hash = crypto.createHash('md5').update(item.title).digest('hex').slice(0, 6);
@@ -47,12 +49,12 @@ const getStore = Flux => (
                 
                 return { deletedManga, hasMore };
             },
-            
+
             clearNewMangaList() {
                 Store.newMangaList = [];
                 return;
             },
-            
+
             saveNewManga() {
                 MangaManage.addManga(Store.newMangaList);
                 return MangaManage.saveMangaConfig();
