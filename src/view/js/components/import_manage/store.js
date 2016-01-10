@@ -1,6 +1,7 @@
-import fs from 'fs';
-import crypto from 'crypto';
-import { clone } from '../../modules/util';
+const fs = require('fs');
+const crypto = require('crypto');
+const { clone } = require('../../modules/util');
+const MangaManage = require('../../modules/manga_manage');
 
 let Store = {
     newMangaList: []
@@ -45,9 +46,19 @@ const getStore = Flux => (
                 hasMore = (Store.newMangaList.length ? true : false);
                 
                 return { deletedManga, hasMore };
+            },
+            
+            clearNewMangaList() {
+                Store.newMangaList = [];
+                return;
+            },
+            
+            saveNewManga() {
+                MangaManage.addManga(Store.newMangaList);
+                return MangaManage.saveMangaConfig();
             }
         })
     )
 )
 
-export default getStore
+module.exports = getStore

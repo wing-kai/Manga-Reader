@@ -1,4 +1,4 @@
-export const clone = o => {
+const clone = o => {
     let k, ret = o, b;
     if (o && ((b = (o instanceof Array)) || o instanceof Object)) {
         ret = b ? [] : {};
@@ -9,4 +9,8 @@ export const clone = o => {
         }
     }
     return ret;
+}
+
+module.exports = {
+    clone
 }

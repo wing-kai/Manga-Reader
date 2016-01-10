@@ -1,18 +1,18 @@
-import React from 'react'
-import { Link } from 'react-router'
-import { ipcRenderer } from 'electron'
-import EasyFlux from 'easy-flux'
+const React = require('react');
+const { Link } = require('react-router');
+const { ipcRenderer } = require('electron');
+const EasyFlux = require('easy-flux');
 
-import { MainContext } from '../context'
-import getAction from './action'
-import getStore from './store'
+const { MainContext } = require('../context');
+const getAction = require('./action');
+const getStore = require('./store');
 
 const Flux = new EasyFlux({ dev: true })
 const Action = getAction(Flux)
 const Store = getStore(Flux)
 
 let ImportManage = React.createClass({
-    
+
     contextTypes: Object.assign({}, MainContext),
 
     getInitialState() {
@@ -40,7 +40,7 @@ let ImportManage = React.createClass({
                         )
                     }
                 </div>
-            )            
+            )
         }
         
         const newMangaList = Store.getNewMangaList();
@@ -68,19 +68,22 @@ let ImportManage = React.createClass({
                     <div className="new-manga-wrap empty"></div>
                     <div className="new-manga-wrap empty"></div>
                 </div>
+                <button className="import-confirm" onClick={this.handleClickConfirmBtn}>确认添加</button>
             </div>
-        )        
+        )
     },
 
     componentDidMount() {
         this.context.hideSideBar();
         this.storeListener = Store.listen({
             getMangaInfo: this.handleGetMangaInfo,
-            deleteManga: this.handleDeletedManga
+            deleteManga: this.handleDeletedManga,
+            saveNewManga: this.handleSavedInfo
         });
     },
     
     componentWillUnmount() {
+        Store.clearNewMangaList()
         Store.listenOff(this.storeListener);
     },
     
@@ -119,7 +122,17 @@ let ImportManage = React.createClass({
     
     handleDeletedManga({ deletedManga, hasMore }) {
         this.setState({ firstLoad: !hasMore });
+    },
+    
+    handleClickConfirmBtn() {
+        Action.saveNewManga();
+    },
+    
+    handleSavedInfo(resultPromise) {
+        resultPromise.then(result => {
+            console.log(result);
+        })
     }
 });
 
-export default ImportManage
+module.exports = ImportManage

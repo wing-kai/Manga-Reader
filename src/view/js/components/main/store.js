@@ -7,4 +7,4 @@ const getStore = Flux => (
     }))
 )
 
-export default getStore
+module.exports = getStore

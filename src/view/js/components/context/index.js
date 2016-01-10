@@ -1,6 +1,6 @@
-import React from 'react'
+const React = require('react');
 
-export const MainContext = {
+exports.MainContext = {
     showSideBar: React.PropTypes.func,
     hideSideBar: React.PropTypes.func
 }

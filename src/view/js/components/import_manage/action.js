@@ -1,4 +1,4 @@
-import fs from 'fs';
+const fs = require('fs');
 
 const REGEXP = {
     IMAGE_FILE: /^.+(\.png|\.jpg|\.gif|\.bmp)$/,
@@ -37,8 +37,12 @@ const getAction = Flux => (
         
         deleteManga(hash) {
             next(hash)
+        },
+        
+        saveNewManga() {
+            next()
         }
     }))
 )
 
-export default getAction
+module.exports = getAction

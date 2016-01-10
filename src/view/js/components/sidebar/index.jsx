@@ -1,5 +1,5 @@
-import React from 'react'
-import { Link } from 'react-router'
+const React = require('react');
+const { Link } = require('react-router');
 
 let SideBar = React.createClass({
     getDefaultProps() {
@@ -28,4 +28,4 @@ let SideBar = React.createClass({
     }
 });
 
-export default SideBar
+module.exports = SideBar

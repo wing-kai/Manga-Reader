@@ -1,7 +1,7 @@
-import React from 'react'
-import { Link } from 'react-router'
-import { MainContext } from '../context'
-import { VIEW_MODE } from './constants'
+const React = require('react');
+const { Link } = require('react-router');
+const { MainContext } = require('../context')
+const { VIEW_MODE } = require('./constants')
 
 let PageContainer = React.createClass({
     getInitialState() {
@@ -136,4 +136,4 @@ let Reader = React.createClass({
     }    
 })
 
-export default Reader
+module.exports = Reader

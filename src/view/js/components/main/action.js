@@ -9,4 +9,4 @@ const getAction = (Flux) => (
     }))
 )
 
-export default getAction
+module.exports = getAction

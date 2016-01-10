@@ -1,7 +1,7 @@
 'use strict';
 
-import electron from 'electron';
-import fs from 'fs';
+const electron = require('electron');
+const fs = require('fs');
 
 const { app, BrowserWindow, ipcMain, dialog } = electron;
 

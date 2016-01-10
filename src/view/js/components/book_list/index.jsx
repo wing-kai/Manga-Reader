@@ -1,6 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router'
-import { MainContext } from '../context'
+const React = require('react');
+const Link = require('react-router').Link;
+const MainContext = require('../context').MainContext;
 
 let BookList = React.createClass({
     contextTypes: Object.assign({}, MainContext),
@@ -32,4 +32,4 @@ let BookList = React.createClass({
     }
 });
 
-export default BookList
+module.exports = BookList

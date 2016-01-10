@@ -1,12 +1,12 @@
-import React from 'react'
-import EasyFlux from 'easy-flux' 
+const React = require('react');
+const EasyFlux = require('easy-flux' );
 
-import Header from '../headers'
-import SideBar from '../sidebar'
+const Header = require('../headers');
+const SideBar = require('../sidebar');
 
-import { MainContext } from '../context'
-import getAction from './action'
-import getStore from './store'
+const { MainContext } = require('../context');
+const getAction = require('./action');
+const getStore = require('./store');
 
 const Flux = new EasyFlux({ dev: true })
 const Action = getAction(Flux)
@@ -58,4 +58,4 @@ let Main = React.createClass({
     }
 });
 
-export default Main
+module.exports = Main
