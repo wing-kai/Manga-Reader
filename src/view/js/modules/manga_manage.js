@@ -20,7 +20,7 @@ class Manga {
     }
 
     get(key) {
-        return key in this.data ? this.data[key] : null;
+        return ('data' in this && key in this.data) ? this.data[key] : null;
     }
 
     set(values) {
@@ -42,7 +42,8 @@ class Manga {
 
     remove() {
         this.data = {};
-        deleted = true;
+        this.deleted = true;
+        MangaList = MangaList.filter(obj => obj.getOriginData() !== null);
         return true;
     }
 }
@@ -117,7 +118,7 @@ const deleteManga = function() {
 
 // 获得对象拷贝
 const getMangaListCopy = function() {
-    return MangaList.slice(0)
+    return MangaList.filter(obj => obj.getOriginData() !== null).slice(0)
 }
 
 module.exports = {

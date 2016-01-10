@@ -17,25 +17,41 @@ let BookList = React.createClass({
     contextTypes: Object.assign({}, MainContext),
 
     render() {
+
+        const that = this;
+
+        let bookList = MangaManage.getMangaListCopy().map(function(manga) {
+            return (
+                <div className="manga-wrap" key={manga.get("hash")} title={manga.get("title")}>
+                    <Link to={"/reader/" + manga.get("hash")}>
+                        <img src={manga.get("path") + '/' + manga.get("cover")} alt={manga.get("title")} />
+                    </Link>
+                    <button className="hover-delete" title='删除漫画' onClick={that.handleClickRemoveBtn.bind(that, manga)} />
+                </div>
+            )
+        });
+
         return (
             <div className="container">
                 <div className="book-list">
                     {
-                        MangaManage.getMangaListCopy().map(function(manga) {
-                            return (
-                                <Link to={"/reader/" + manga.get("hash")} className="manga-wrap" key={manga.get("hash")} title={manga.get("title")}>
-                                    <img src={manga.get("path") + '/' + manga.get("cover")} alt={manga.get("title")} />
-                                </Link>
-                            )
-                        })
+                        bookList.length ? [
+                            bookList,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />,
+                            <a className="manga-wrap empty" />
+                        ] : (
+                            <Link className="empty-tips" to="/import">
+                                你的书架上还没有任何漫画噢
+                                <p />
+                                点此添加漫画
+                            </Link>
+                        )
                     }
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
-                    <a className="manga-wrap empty"></a>
                 </div>
             </div>
         )
@@ -43,12 +59,19 @@ let BookList = React.createClass({
 
     componentDidMount() {
         this.context.showSideBar();
-        // this.storeListeners = Store.listen({
-        //     deletedManga: this.handleDeletedManga
-        // })
     },
 
-    handleClickDeleteBtn() {
+    handleClickRemoveBtn(mangaObj) {
+        const that = this;
+        event.stopPropagation();
+        mangaObj.remove();
+        MangaManage.saveMangaConfig().then(() => {
+            that.forceUpdate();
+        });
+    },
+
+    handleDeletedManga() {
+
     }
 });
 

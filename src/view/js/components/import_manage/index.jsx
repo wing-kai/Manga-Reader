@@ -54,7 +54,7 @@ let ImportManage = React.createClass({
                             return (
                                 <div className="new-manga-wrap" key={hash}>
                                     <img src={path + '/' + cover} alt={title} title={title} />
-                                    <button className="delete" title='删除漫画' onClick={this.handleClickDeleteBtn.bind(that, hash)}></button>
+                                    <button className="hover-delete" title='删除漫画' onClick={this.handleClickDeleteBtn.bind(that, hash)}></button>
                                 </div>
                             )
                         })
