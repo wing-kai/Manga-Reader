@@ -25,7 +25,7 @@
     display: inline-block;
     text-indent: 0;
     text-align: center;
-    color: #fff;
+    color: #ccc;
     background-color: transparent;
     border-radius: 5px;
     border: solid 1px #ccc;
@@ -34,17 +34,30 @@
     font-size: 11px;
 }
 
+.control-bar .btn:not(:disabled) {
+    cursor: pointer;
+}
+
+.control-bar .btn:disabled {
+    cursor: not-allowed;
+}
+
 .control-bar input {
     border: solid 1px #ccc;
     background-color: transparent;
     width: 50px;
     height: 30px;
     text-align: center;
-    color: #fff;
+    color: #ccc;
     font-size: 20px;
     text-align: center;
-    color: #fff;
     font-size: 20px;
+}
+
+.control-bar .btn:not(:disabled):hover,
+.control-bar input:focus {
+    color: #fff;
+    border-color: #fff;
 }
 
 .page-container {

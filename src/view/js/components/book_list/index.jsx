@@ -20,16 +20,14 @@ let BookList = React.createClass({
 
         const that = this;
 
-        let bookList = MangaManage.getMangaListCopy().map(function(manga) {
-            return (
-                <div className="manga-wrap" key={manga.get("hash")} title={manga.get("title")}>
-                    <Link to={"/reader/" + manga.get("hash")}>
-                        <img src={manga.get("path") + '/' + manga.get("cover")} alt={manga.get("title")} />
-                    </Link>
-                    <button className="hover-delete" title='删除漫画' onClick={that.handleClickRemoveBtn.bind(that, manga)} />
-                </div>
-            )
-        });
+        let bookList = MangaManage.getMangaListCopy().map(manga => (
+            <div className="manga-wrap" key={manga.get("hash")} title={manga.get("title")}>
+                <Link to={"/reader/" + manga.get("hash")}>
+                    <img src={manga.get("path") + '/' + manga.get("cover")} alt={manga.get("title")} />
+                </Link>
+                <button className="hover-delete" title='删除漫画' onClick={that.handleClickRemoveBtn.bind(that, manga)} />
+            </div>
+        ));
 
         return (
             <div className="container">
@@ -37,13 +35,13 @@ let BookList = React.createClass({
                     {
                         bookList.length ? [
                             bookList,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />,
-                            <a className="manga-wrap empty" />
+                            <a className="manga-wrap empty" key='empty0' />,
+                            <a className="manga-wrap empty" key='empty1' />,
+                            <a className="manga-wrap empty" key='empty2' />,
+                            <a className="manga-wrap empty" key='empty3' />,
+                            <a className="manga-wrap empty" key='empty4' />,
+                            <a className="manga-wrap empty" key='empty5' />,
+                            <a className="manga-wrap empty" key='empty6' />
                         ] : (
                             <Link className="empty-tips" to="/import">
                                 你的书架上还没有任何漫画噢

@@ -10,7 +10,7 @@ const Reader = require('./reader');
 
 const MangaManage = require('../modules/manga_manage');
 
-let Body = (
+const Body = (
     <Router history={createHashHistory()}>
         <Route path='/' component={Main}>
             <IndexRoute component={BookList} />
@@ -20,7 +20,7 @@ let Body = (
     </Router>
 )
 
-MangaManage.readConfigFile().then(function(result) {
+MangaManage.readConfigFile().then(result => {
     ReactDOM.render(Body, document.querySelector('.body'));
 });
 

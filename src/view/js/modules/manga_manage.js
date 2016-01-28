@@ -3,6 +3,10 @@ const fs = require('fs');
 const Immutable = require('immutable');
 
 const CONFIG_PATH = "manga.json";
+const REGEXP = {
+    IMAGE_FILE: /^.+(\.png|\.jpg|\.gif|\.bmp)$/,
+    MANGA_TITLE: /^.+\/(.+)$/
+}
 let MangaList = Immutable.List([]);
 
 class Manga {
@@ -39,6 +43,16 @@ class Manga {
         }
 
         return clone(this.data);
+    }
+    
+    getPageFile() {
+        const thisData = this.data;
+        const list = fs.readdirSync(thisData.path).filter(
+            fileName => REGEXP.IMAGE_FILE.test(fileName) && fs.statSync(thisData.path + '/' + fileName).isFile()
+        ).map(
+            fileName => thisData.path + '/' + fileName
+        )
+        return list;
     }
 
     remove() {
@@ -120,11 +134,17 @@ const deleteManga = function() {
 // 获得对象拷贝
 const getMangaListCopy = () => MangaList.toArray();
 
+const getManga = hash => {
+    const findResult = MangaList.toArray().filter(mangaData => mangaData.get('hash') === hash);
+    return findResult.length ? findResult[0] : false;
+}
+
 module.exports = {
     Manga,
     readConfigFile,
     addManga,
     saveMangaConfig,
     getMangaListCopy,
-    deleteManga
+    deleteManga,
+    getManga
 }

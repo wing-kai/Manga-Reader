@@ -1,17 +1,27 @@
 const React = require('react');
 const { Link } = require('react-router');
-const { MainContext } = require('../context')
-const { VIEW_MODE } = require('./constants')
+const { MainContext } = require('../context');
+const { VIEW_MODE } = require('./constants');
+const MangaManage = require('../../modules/manga_manage');
 
-let PageContainer = React.createClass({
+const Reader = React.createClass({
+
+    contextTypes: Object.assign({}, MainContext),
+    
     getInitialState() {
+
+        const manga = MangaManage.getManga(this.props.params.hashId);
+        const pageList = manga ? manga.getPageFile() : [];
+
         return {
+            pageList,
+            pageNum: 0,
             viewMode: VIEW_MODE.SINGLE,
             imgALoaded: false,
             imgBLoaded: false,
             imgAStyle: {},
             imgBStyle: {}            
-        } 
+        }
     },
 
     render() {
@@ -23,7 +33,7 @@ let PageContainer = React.createClass({
             case VIEW_MODE.SINGLE:
                 wrapContent = (
                     <div className="wrap default" ref='wrap'>
-                        <img src="../img/example_tabloid.png" alt="example_tabloid" />
+                        <img src={thisState.pageList[thisState.pageNum]} alt={thisState.pageNum} />
                     </div>
                 )
                 break;
@@ -40,7 +50,15 @@ let PageContainer = React.createClass({
         return (
             <div className="page-container">
                 {wrapContent}
-                {this.props.children}
+                <div className='control-bar'>
+                    <Link to="/" className='btn'>退出</Link>
+                    <button className='btn' disabled={true}>阅读</button>
+                    <button className='btn turn left' onClick={this.handleClickPreviousPage}>上一页</button>
+                    <input type="text" value={thisState.pageNum + 1} disabled={true} />
+                    <button className='btn turn right' onClick={this.handleClickNextPage}>下一页</button>
+                    <button className='btn' disabled={true}>书签</button>
+                    <button className='btn' disabled={true}>模式</button>
+                </div>
             </div>
         )        
     },
@@ -77,7 +95,7 @@ let PageContainer = React.createClass({
             }
         });
     },
-    
+
     handleScaleImage() {
 
         const thisRefs = this.refs;
@@ -106,34 +124,31 @@ let PageContainer = React.createClass({
             imgAStyle: newImgAStyle,
             imgBStyle: newImgBStyle
         });
-    }
-})
+    },
+    
+    handleClickPreviousPage() {
+        const thisState = this.state;
+        let newState = {
+            pageNum: thisState.pageNum
+        }
+        
+        if (thisState.pageNum !== 0)
+            newState.pageNum--;
 
-let ControlBar = React.createClass({
-    render() {
-        return (
-            <div className='control-bar'>
-                <Link to="/" className='btn'>退出</Link>
-                <button className='btn'>阅读</button>
-                <button className='btn turn left'>上一页</button>
-                <input type="text" defaultValue="13" />
-                <button className='btn turn right'>下一页</button>
-                <button className='btn'>书签</button>
-                <button className='btn'>模式</button>
-            </div>
-        )
-    }
-})
+        this.setState(newState);
+    },
+    
+    handleClickNextPage() {
+        const thisState = this.state;
+        let newState = {
+            pageNum: thisState.pageNum
+        }
+        
+        if (thisState.pageNum !== thisState.pageList.length - 1)
+            newState.pageNum++;
 
-let Reader = React.createClass({
-    contextTypes: Object.assign({}, MainContext),
-    render() {
-        return (
-            <PageContainer>
-                <ControlBar />
-            </PageContainer>
-        )
-    }    
+        this.setState(newState);
+    }
 })
 
 module.exports = Reader
