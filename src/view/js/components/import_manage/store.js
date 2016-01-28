@@ -1,11 +1,12 @@
 const fs = require('fs');
 const crypto = require('crypto');
+const Immutable = require('immutable');
 const { clone } = require('../../modules/util');
 const MangaManage = require('../../modules/manga_manage');
 
-let Store = {
+let Store = Immutable.Map({
     newMangaList: []
-}
+})
 
 const getStore = Flux => (
     Flux.createStore(
@@ -14,7 +15,7 @@ const getStore = Flux => (
 
                 // 遍历选中的漫画目录、是否有重复添加，然后再获取每个漫画目录名称的md5值
                 const newMangaInfo = clone(directories).filter(
-                    ({ title }) => !Store.newMangaList.some(
+                    ({ title }) => !Store.get('newMangaList').some(
                         item => item.title === title
                     ) && !MangaManage.getMangaListCopy().some(
                         manga => manga.get("title") === title
@@ -24,18 +25,18 @@ const getStore = Flux => (
                     return item;
                 });
 
-                Store.newMangaList = Store.newMangaList.concat(newMangaInfo);
+                Store = Store.set('newMangaList', Store.get('newMangaList').concat(newMangaInfo));
                 return newMangaInfo;
             },
             
-            getNewMangaList: () => clone(Store.newMangaList),
+            getNewMangaList: () => Store.get('newMangaList'),
             
             deleteManga(delHash) {
                 
                 let deletedManga;
                 let hasMore;
 
-                let newMangaList = Store.newMangaList.filter( mangaInfo => {
+                let newMangaList = Store.get('newMangaList').filter( mangaInfo => {
                     if (mangaInfo.hash === delHash) {
                         deletedManga = mangaInfo;
                         return false;
@@ -44,19 +45,19 @@ const getStore = Flux => (
                     return true;
                 });
                 
-                Store.newMangaList = clone(newMangaList);
-                hasMore = (Store.newMangaList.length ? true : false);
+                Store = Store.set('newMangaList', newMangaList);
+                hasMore = (Store.get('newMangaList').length ? true : false);
                 
                 return { deletedManga, hasMore };
             },
 
             clearNewMangaList() {
-                Store.newMangaList = [];
+                Store.set('newMangaList', []);
                 return;
             },
 
             saveNewManga() {
-                MangaManage.addManga(Store.newMangaList);
+                MangaManage.addManga(Store.get('newMangaList'));
                 return MangaManage.saveMangaConfig();
             }
         })

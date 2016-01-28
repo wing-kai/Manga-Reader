@@ -1,8 +1,9 @@
 const { clone } = require('./util');
 const fs = require('fs');
+const Immutable = require('immutable');
 
 const CONFIG_PATH = "manga.json";
-let MangaList = [];
+let MangaList = Immutable.List([]);
 
 class Manga {
 
@@ -49,9 +50,9 @@ class Manga {
 }
 
 // 初始化配置文件里的数据
-const initialData = originData => originData.map( data => new Manga(data) );
+const initialData = originData => Immutable.List(originData.map( data => new Manga(data) ));
 
-// 获取漫画
+// 获取配置文件
 const readConfigFile = () => {
 
     // 确认文件存在
@@ -70,7 +71,7 @@ const readConfigFile = () => {
                 try {
                     const originData = JSON.parse(content).data;
                     MangaList = initialData(originData);
-                    resolve(getMangaListCopy());
+                    resolve(MangaList.toArray());
                 } catch(e) {
                     reject(e);
                 }
@@ -78,9 +79,9 @@ const readConfigFile = () => {
         }),
         // 不存在
         () => new Promise((resolve, reject) => {
-            MangaList = [];
+            MangaList = Immutable.List([]);
             fs.writeFile(CONFIG_PATH, '{"data":[]}', 'utf-8', err => {
-                err ? reject(err) : resolve(getMangaListCopy())
+                err ? reject(err) : resolve(MangaList.toArray());
             });
         })
     );
@@ -90,16 +91,16 @@ const readConfigFile = () => {
 const addManga = function(newMangaList = []) {
 
     newMangaList.forEach(data => {
-        MangaList.push(new Manga(clone(data))) 
+        MangaList = MangaList.push(new Manga(clone(data))); 
     });
 
-    return getMangaListCopy()
+    return MangaList.toArray();
 }
 
 // 写入配置文件
 const saveMangaConfig = function() {
 
-    let configContent = MangaList.map(
+    let configContent = MangaList.toArray().map(
         mangaData => mangaData.getOriginData()
     ).filter(mangaData => mangaData !== null);
 
@@ -107,7 +108,7 @@ const saveMangaConfig = function() {
 
     return new Promise((resolve, reject) => {
         fs.writeFile(CONFIG_PATH, configContent, 'utf-8', err => {
-            err ? reject(err) : resolve(getMangaListCopy())
+            err ? reject(err) : resolve(MangaList.toArray())
         });
     })
 }
@@ -117,9 +118,7 @@ const deleteManga = function() {
 }
 
 // 获得对象拷贝
-const getMangaListCopy = function() {
-    return MangaList.filter(obj => obj.getOriginData() !== null).slice(0)
-}
+const getMangaListCopy = () => MangaList.toArray();
 
 module.exports = {
     Manga,
