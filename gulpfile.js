@@ -8,7 +8,7 @@ const plumber = require('gulp-plumber');
 const notify = require('gulp-notify');
 const rename = require('gulp-rename'); //重命名
 
-var onError = function (err) {
+const onError = function (err) {
     notify.onError({
         title: "编译出错",
         message: err.message.replace(/.+\/(.+\.(jsx|js).+)/g, '$1'),
