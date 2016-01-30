@@ -102,7 +102,7 @@ const readConfigFile = () => {
 }
 
 // 新增漫画
-const addManga = function(newMangaList = []) {
+const addManga = (newMangaList = []) => {
 
     newMangaList.forEach(data => {
         MangaList = MangaList.push(new Manga(clone(data))); 
@@ -112,7 +112,7 @@ const addManga = function(newMangaList = []) {
 }
 
 // 写入配置文件
-const saveMangaConfig = function() {
+const saveMangaConfig = () => {
 
     let configContent = MangaList.toArray().map(
         mangaData => mangaData.getOriginData()
@@ -127,7 +127,7 @@ const saveMangaConfig = function() {
     })
 }
 
-const deleteManga = function() {
+const deleteManga = () => {
 
 }
 
