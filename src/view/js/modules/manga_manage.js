@@ -1,26 +1,24 @@
 const { clone } = require('./util');
 const fs = require('fs');
 const Immutable = require('immutable');
+const { CONFIG_PATH, REGEXP, VIEW_MODE } = require('../components/common/constants');
 
-const CONFIG_PATH = "manga.json";
-const REGEXP = {
-    IMAGE_FILE: /^.+(\.png|\.jpg|\.gif|\.bmp)$/,
-    MANGA_TITLE: /^.+\/(.+)$/
-}
 let MangaList = Immutable.List([]);
 
 class Manga {
 
     constructor({
-        hash    = "",
-        cover   = "",
-        path    = "",
-        index   = 0,
-        title   = "",
-        author  = "",
-        tags    = []
+        hash       = "",
+        cover      = "",
+        path       = "",
+        index      = 0,
+        title      = "",
+        author     = "",
+        tags       = [],
+        lastReaded = 0,
+        viewMode   = VIEW_MODE.SINGLE
     }) {
-        this.data = { hash, cover, path, index, title, author, tags };
+        this.data = { hash, cover, path, index, title, author, tags, lastReaded, viewMode };
         this.deleted = false;
     }
 

@@ -6,19 +6,20 @@ const MangaManage = require('../../modules/manga_manage');
 const { remote } = require('electron');
 const { Menu, MenuItem } = remote;
 
+let manga;
+
 const Reader = React.createClass({
 
     contextTypes: Object.assign({}, MainContext),
-    
+
     getInitialState() {
 
-        const manga = MangaManage.getManga(this.props.params.hashId);
-        const pageList = manga ? manga.getPageFile() : [];
+        manga = MangaManage.getManga(this.props.params.hashId);
 
         return {
-            pageList,
-            pageNum: 0,
-            viewMode: VIEW_MODE.SINGLE,
+            pageList: manga ? manga.getPageFile() : [],
+            pageNum: manga.get('lastReaded'),
+            viewMode: manga.get('viewMode'),
             readMode: READ_MODE.TRADITION,
             imgALoaded: false,
             imgBLoaded: false,
@@ -162,9 +163,8 @@ const Reader = React.createClass({
             type: 'checkbox',
             checked: thisState.viewMode === VIEW_MODE.SINGLE,
             click: () => {
-                that.setState({
-                    viewMode: VIEW_MODE.SINGLE
-                });
+                manga.set({ viewMode: VIEW_MODE.SINGLE });
+                that.setState({ viewMode: VIEW_MODE.SINGLE });
             }
         }));
         menu.append(new MenuItem({
@@ -179,6 +179,10 @@ const Reader = React.createClass({
                 if (newState.pageNum % 2 === 1) {
                     newState.pageNum--;
                 }
+                manga.set({
+                    viewMode: VIEW_MODE.DOUBLE,
+                    lastReaded: newState.pageNum
+                });
                 that.setState(newState);
             }
         }));
@@ -195,16 +199,18 @@ const Reader = React.createClass({
 
         menu.popup(remote.getCurrentWindow(), Number(boundingClientRect.left.toFixed(0)), boundingClientRect.top);
     },
-    
+
     componentWillUpdate() {
         if (this.state.viewMode !== VIEW_MODE.DOUBLE)
             window.removeEventListener('resize', this.handleScaleImage);
     },
-    
+
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleScaleImage);
+        MangaManage.saveMangaConfig();
+        manga = undefined;
     },
-    
+
     handleImageLoaded(order) {
 
         let that = this;
@@ -236,18 +242,18 @@ const Reader = React.createClass({
 
         let newImgAStyle = {};
         let newImgBStyle = {};
-        
+
         newImgBStyle.height = imgA.height;
         newImgBStyle.width  = imgA.height * imgB.width / imgB.height;
-        
+
         const z = (imgA.width + newImgBStyle.width) / wrap.clientWidth;
         const getNewLength = (len) => +(len/z).toFixed(0);
-        
+
         newImgAStyle = {
             width:  getNewLength(imgA.width),
             height: getNewLength(imgA.height)
         }
-        
+
         newImgBStyle = {
             width:  getNewLength(newImgBStyle.width),
             height: getNewLength(newImgBStyle.height)
@@ -258,7 +264,7 @@ const Reader = React.createClass({
             imgBStyle: newImgBStyle
         });
     },
-    
+
     handleClickPreviousPage() {
         const thisState = this.state;
         let newState = {
@@ -271,32 +277,33 @@ const Reader = React.createClass({
             } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
                 newState.pageNum = newState.pageNum === 1 ? 0 : newState.pageNum - 2;
             } else {
-                
+                // waterfall...
             }
         }
 
-
+        manga.set({ lastReaded: newState.pageNum });
         this.setState(newState);
     },
-    
+
     handleClickNextPage() {
         const thisState = this.state;
         let newState = {
             pageNum: thisState.pageNum
         }
-        
+
         if (thisState.pageNum !== thisState.pageList.length - 1) {
             if (thisState.viewMode === VIEW_MODE.SINGLE) {
                 newState.pageNum++;
             } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
                 newState.pageNum = newState.pageNum === 0 ? 1 : newState.pageNum + 2;
             } else {
-                
+                // waterfall...
             }
         }
 
+        manga.set({ lastReaded: newState.pageNum });
         this.setState(newState);
     }
 })
 
-module.exports = Reader
+module.exports = Reader;

@@ -11,6 +11,12 @@ const clone = o => {
     return ret;
 }
 
+const isArray = arg => Object.prototype.toString.call(arg) === '[object Array]';
+
+const isString = args => typeof args === 'string';
+
 module.exports = {
+    isArray,
+    isString,
     clone
 }

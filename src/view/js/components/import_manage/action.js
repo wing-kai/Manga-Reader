@@ -34,11 +34,11 @@ const getAction = Flux => (
                 )
             });
         },
-        
+
         deleteManga(hash) {
             next(hash)
         },
-        
+
         saveNewManga() {
             next()
         }
