@@ -4,6 +4,7 @@ const Immutable = require('immutable');
 const { CONFIG_PATH, REGEXP, VIEW_MODE } = require('../components/common/constants');
 
 let MangaList = Immutable.List([]);
+let Categories = Immutable.List([]);
 
 class Manga {
 
@@ -14,16 +15,16 @@ class Manga {
         index      = 0,
         title      = "",
         author     = "",
-        tags       = [],
+        category   = [],
         lastReaded = 0,
         viewMode   = VIEW_MODE.SINGLE
     }) {
-        this.data = { hash, cover, path, index, title, author, tags, lastReaded, viewMode };
+        this.data = { hash, cover, path, index, title, author, category, lastReaded, viewMode };
         this.deleted = false;
     }
 
     get(key) {
-        return ('data' in this && key in this.data) ? this.data[key] : null;
+        return ('data' in this && key in this.data) ? clone(this.data[key]) : null;
     }
 
     set(values) {
@@ -32,6 +33,20 @@ class Manga {
                 this.data[key] = clone(values[key]);
             }
         }
+        return this;
+    }
+
+    setCategory(name) {
+        if (!this.category.some(category => category === name)) {
+            this.category.push(name);
+        }
+
+        return this;
+    }
+
+    removeFromCategory(name) {
+        this.category.filter = this.category.filter(category => category !== name);
+        return this;
     }
 
     getOriginData() {
@@ -61,9 +76,6 @@ class Manga {
     }
 }
 
-// 初始化配置文件里的数据
-const initialData = originData => Immutable.List(originData.map( data => new Manga(data) ));
-
 // 获取配置文件
 const readConfigFile = () => {
 
@@ -81,9 +93,10 @@ const readConfigFile = () => {
                     return;
                 }
                 try {
-                    const originData = JSON.parse(content).data;
-                    MangaList = initialData(originData);
-                    resolve(MangaList.toArray());
+                    const originData = JSON.parse(content);
+                    MangaList  = Immutable.List('manga' in originData ? originData.manga.map( data => new Manga(data) ) : []);
+                    Categories = Immutable.List('categories' in originData ? originData.categories : []);
+                    resolve(true);
                 } catch(e) {
                     reject(e);
                 }
@@ -92,8 +105,8 @@ const readConfigFile = () => {
         // 不存在
         () => new Promise((resolve, reject) => {
             MangaList = Immutable.List([]);
-            fs.writeFile(CONFIG_PATH, '{"data":[]}', 'utf-8', err => {
-                err ? reject(err) : resolve(MangaList.toArray());
+            fs.writeFile(CONFIG_PATH, '{"manga":[],"categories":[]}', 'utf-8', err => {
+                err ? reject(err) : resolve(true);
             });
         })
     );
@@ -106,21 +119,20 @@ const addManga = (newMangaList = []) => {
         MangaList = MangaList.push(new Manga(clone(data))); 
     });
 
-    return MangaList.toArray();
+    return MangaList.toJS();
 }
 
 // 写入配置文件
-const saveMangaConfig = () => {
+const saveConfig = () => {
 
-    let configContent = MangaList.toArray().map(
-        mangaData => mangaData.getOriginData()
-    ).filter(mangaData => mangaData !== null);
-
-    configContent = JSON.stringify({data:configContent});
+    const configContent = JSON.stringify({
+        manga: MangaList.map( mangaData => mangaData.getOriginData() ).filter( mangaData => mangaData !== null ).toJS(),
+        categories: Categories.toJS()
+    });
 
     return new Promise((resolve, reject) => {
         fs.writeFile(CONFIG_PATH, configContent, 'utf-8', err => {
-            err ? reject(err) : resolve(MangaList.toArray())
+            err ? reject(err) : resolve(MangaList.toJS())
         });
     })
 }
@@ -129,11 +141,39 @@ const deleteManga = () => {
 
 }
 
+const addCategory = name => {
+    Categories = Categories.push(name);
+    return Categories.toJS();
+}
+
+// 获取全部分类 或 某个分类旗下所有漫画
+const getCategory = (name = false) => {
+    if (name) {
+        return MangaList.toJS().filter(
+            mangaData => mangaData.get('category').some(
+                category => category === name
+            )
+        );
+    }
+    return Categories.toJS();
+}
+
+const deleteCategory = name => {
+    const categoryFilter = category => category !== name;
+    Categories = Categories.filter(categoryFilter);
+    MangaList = MangaList.filter(
+        mangaData => mangaData.set({
+            category: mangaData.get('category').filter(categoryFilter)
+        })
+    )
+    return Categories.toJS();
+}
+
 // 获得对象拷贝
-const getMangaListCopy = () => MangaList.toArray();
+const getMangaListCopy = () => MangaList.toJS();
 
 const getManga = hash => {
-    const findResult = MangaList.toArray().filter(mangaData => mangaData.get('hash') === hash);
+    const findResult = MangaList.toJS().filter(mangaData => mangaData.get('hash') === hash);
     return findResult.length ? findResult[0] : false;
 }
 
@@ -141,8 +181,11 @@ module.exports = {
     Manga,
     readConfigFile,
     addManga,
-    saveMangaConfig,
+    saveConfig,
     getMangaListCopy,
     deleteManga,
-    getManga
+    getManga,
+    addCategory,
+    getCategory,
+    deleteCategory
 }

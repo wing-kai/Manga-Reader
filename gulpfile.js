@@ -20,7 +20,8 @@ const PATH = {
     SCRIPT: ['src/**/*.js', 'src/**/*.jsx'],
     HTML: ['src/**/*.html'],
     CSS: ['src/**/*.css'],
-    IMG: ['src/**/*.png', 'src/**/*.jpg', 'src/**/*.svg', 'src/**/*.gif', 'src/**/*.bmp']
+    IMG: ['src/**/*.png', 'src/**/*.jpg', 'src/**/*.svg', 'src/**/*.gif', 'src/**/*.bmp'],
+    FONT: ['src/**/*.ttf', 'src/**/*.woff']
 }
 
 gulp.task('css', function() {
@@ -29,6 +30,10 @@ gulp.task('css', function() {
 
 gulp.task('img', function() {
     gulp.src(PATH.IMG).pipe(gulp.dest('asset'));
+});
+
+gulp.task('font', function() {
+    gulp.src(PATH.FONT).pipe(gulp.dest('asset'));
 });
 
 gulp.task('html', function () {
@@ -51,6 +56,8 @@ gulp.task('watch', function () {
     gulp.watch(PATH.SCRIPT, ['script']);
     gulp.watch(PATH.CSS, ['css']);
     gulp.watch(PATH.HTML, ['html']);
+    gulp.watch(PATH.IMG, ['img']);
+    gulp.watch(PATH.FONT, ['font']);
 });
 
-gulp.task('default', ['html', 'script', 'css', 'img', 'watch']);
+gulp.task('default', ['html', 'script', 'css', 'img', 'font', 'watch']);
