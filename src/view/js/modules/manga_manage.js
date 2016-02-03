@@ -1,5 +1,6 @@
 const { clone } = require('./util');
 const fs = require('fs');
+const crypto = require('crypto');
 const Immutable = require('immutable');
 const { CONFIG_PATH, REGEXP, VIEW_MODE } = require('../components/common/constants');
 
@@ -36,16 +37,18 @@ class Manga {
         return this;
     }
 
-    setCategory(name) {
-        if (!this.category.some(category => category === name)) {
-            this.category.push(name);
-        }
+    setCategory(hash) {
+        if (!this.data.category.some(categoryHash => categoryHash === hash))
+            this.data.category.push(hash);
 
+        saveConfig();
         return this;
     }
 
-    removeFromCategory(name) {
-        this.category.filter = this.category.filter(category => category !== name);
+    removeFromCategory(hash) {
+        this.data.category = this.data.category.filter(categoryHash => categoryHash !== hash);
+
+        saveConfig();
         return this;
     }
 
@@ -119,7 +122,7 @@ const addManga = (newMangaList = []) => {
         MangaList = MangaList.push(new Manga(clone(data))); 
     });
 
-    return MangaList.toJS();
+    return saveConfig().then(() => MangaList.toJS());
 }
 
 // 写入配置文件
@@ -138,34 +141,55 @@ const saveConfig = () => {
 }
 
 const deleteManga = () => {
-
 }
 
 const addCategory = name => {
-    Categories = Categories.push(name);
+
+    const newCategory = {
+        id: crypto.createHash('md5').update(name).digest('hex').slice(0, 8),
+        name
+    };
+
+    if (!Categories.some(category => category.id === newCategory.id))
+        Categories = Categories.push(newCategory);
+
     return Categories.toJS();
 }
 
 // 获取全部分类 或 某个分类旗下所有漫画
-const getCategory = (name = false) => {
-    if (name) {
+const getCategory = (hash = false) => {
+    if (hash) {
         return MangaList.toJS().filter(
             mangaData => mangaData.get('category').some(
-                category => category === name
+                categoryHash => categoryHash === hash
             )
         );
     }
     return Categories.toJS();
 }
 
-const deleteCategory = name => {
-    const categoryFilter = category => category !== name;
-    Categories = Categories.filter(categoryFilter);
+const deleteCategory = hash => {
+    Categories = Categories.filter(category => category.id !== hash);
     MangaList = MangaList.filter(
         mangaData => mangaData.set({
-            category: mangaData.get('category').filter(categoryFilter)
+            category: mangaData.get('category').filter(
+                category => category !== hash
+            )
         })
     )
+    saveConfig();
+    return Categories.toJS();
+}
+
+const editCategory = (hash, newName) => {
+    Categories = Categories.map(
+        category => ({
+            id: category.id,
+            name: hash === category.id ? newName : category.name
+        })
+    );
+
+    saveConfig();
     return Categories.toJS();
 }
 
@@ -187,5 +211,6 @@ module.exports = {
     getManga,
     addCategory,
     getCategory,
+    editCategory,
     deleteCategory
 }

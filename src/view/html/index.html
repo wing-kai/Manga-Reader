@@ -1,151 +1,43 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <meta charset="utf-8">
     <title>Manga Reader</title>
     <link rel="stylesheet" href="../css/common.css" />
     <link rel="stylesheet" href="../css/reader.css" />
-    <link rel="stylesheet" href="../css/navigation.css" />
-    <link rel="stylesheet" href="../css/import_manage.css" />
+    <link rel="stylesheet" href="../css/iconfont.css" />
     <style>
-        html,
-        body {
-            overflow: hidden;
-            -webkit-app-region: drag;
-            background-color: #222;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .body, .home {
-            height: inherit;
-            width: inherit;
-        }
-        
-        .home {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /*顶部导航栏*/
-        .home > header {
-            background-color: #444;
-            flex-basis: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .home > header button {
-            outline: none;
-            width: 150px;
-            height: 40px;
-            border: none;
-            background-color: transparent;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            align-items: flex-start;
-            text-align: center;
-            box-sizing: border-box;
-            display: inline-block;
-            font: 11px BlinkMacSystemFont;
-            text-decoration: none;
-        }
-        
-        .home > header button a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .home > header button span.line:before {
-            content: ' ';
-            margin: auto;
-            display: block;
-            height: 1px;
-            width: 0%;
-            background-color: #fff;
-            transition: width 200ms ease-in-out;
-            -webkit-transition: width 200ms ease-in-out;
-        }
-
-        .home > header button a:hover + span.line:before {
-            width: 60%;
-        }
-        
-        .main-content {
-            flex: 1;
-            display: flex;
-            /*justify-content: space-around;*/
-        }
-        
-        .book-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            overflow: scroll;
-            padding: 10px;
-        }
-
-        .empty-tips {
-            text-align: center;
-            color: #fff;
-            border: dashed 2px #fff;
-            border-radius: 5px;
-            padding: 20px;
-            margin-top: 50px;        
-            text-decoration: none;    
-        }
-        
-        .manga-wrap {
-            height: 240px;
-            width: 166px;
-            margin: 0 10px 20px;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .manga-wrap img {
-            max-width: 100%;
-        }
-        
-        .manga-wrap.empty {
-            visibility: hidden;
-        }
-        
-        .container {
-            overflow: scroll;
-            flex: 1;
-        }
-        
-        
-        button.hover-delete {
-            position: absolute;
-            height: 16px;
-            width: 16px;
-            background-color: red;
-            color: #fff;
-            border: none;
-            border-radius: 15px;
-            right: 0;
-            top: 0;
-            transform: translate(8px, -8px);
-            display: none;
-            cursor: pointer;
-        }
-
-        *:hover > button.hover-delete,
-        * > button.hover-delete:hover {
-            display: block;
-        }
+    html, body, .body { -webkit-app-region: drag; padding: 0; margin: 0; height: 100%; width: 100%; overflow: hidden; }
+    .home { display: flex; height: 100%; width: 100%; flex-direction: column; }
+    .header { background: #000; flex-basis: 22px; }
+    .container { display: flex; flex: 1; }
+    .sidebar { flex-basis: 50px; background: #222; color: #fff; display: flex; align-items: center; flex-direction: column; padding: 5px 0 10px; }
+    .sidebar button { font-size: 20px; flex-basis: 30px; width: 30px; padding: 0; margin: 15px 0 0; border: none; background: none; color: #bbb; cursor: pointer; transition: color 300ms; }
+    .sidebar button:disabled { cursor: not-allowed; }
+    .sidebar button.active:not(:disabled), .sidebar button:not(:disabled):hover { color: #fff; }
+    .sidebar button:not(:disabled):active { color: #666; }
+    .sidebar + ul { flex-basis: 170px; background: #333; margin: 0; list-style: none; padding: 0; overflow: scroll; }
+    .sidebar + ul > li { height: 40px; line-height: 40px; padding: 0 15px; color: #ccc; font-size: 14px; }
+    .sidebar + ul > li:not(.add-list):hover { color: #fff; }
+    .sidebar + ul > li.active { background: #444; color: #fff; }
+    .sidebar + ul > li.add-list { color: #888; display: none; }
+    .sidebar + ul:hover > li.add-list { display: block; }
+    .sidebar + ul > li > input { border: none; background: #444; padding: 1px 0; margin: 0; height: 20px; line-height: 20px; font-size: 14px; width: 120px; color: #fff; }
+    .main-content { flex: 1; background: #444; display: flex; }
+    .container { overflow: scroll; flex: 1; }
+    .book-list { display: flex; flex-wrap: wrap; justify-content: space-around; overflow: scroll; padding: 10px; }
+    .empty-tips { text-align: center; color: #fff; border: dashed 2px #fff; border-radius: 5px; padding: 20px; margin-top: 50px; text-decoration: none; }
+    .manga-wrap { height: 240px; width: 160px; margin: 10px; position: relative; display: flex; }
+    .manga-wrap a { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .manga-wrap img { max-width: 100%; max-height: 100%; cursor: pointer; }
+    .manga-wrap.empty { visibility: hidden; }
+    button.hover-delete { position: absolute; height: 16px; width: 16px; background-color: red; color: #fff; border: none; border-radius: 15px; right: 0; top: 0; transform: translate(8px, -8px); display: none; cursor: pointer; }
+    *:hover > button.hover-delete, * > button.hover-delete:hover { display: block; }
     </style>
 </head>
 
-<body>
+<body onselectstart="return false">
     <div class="body"></div>
     <script>require('../js/components')</script>
 </body>

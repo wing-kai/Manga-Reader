@@ -49,6 +49,9 @@ ipcMain.on('show-authro-info', () => {
 
 ipcMain.on('quit', app.quit);
 
+// disable zoom
+app.commandLine.appendSwitch('--enable-viewport-meta', 'true');
+
 app.on('ready', () => {
     mainWindow = new BrowserWindow({
         center: true,

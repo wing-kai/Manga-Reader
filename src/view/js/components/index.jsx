@@ -4,23 +4,18 @@ const { Router, Route, Link, IndexRoute, Redirect } = require('react-router');
 const { createHashHistory } = require('history');
 
 const Main = require('./main');
-const ImportManage = require('./import_manage');
-const BookList = require('./book_list');
 const Reader = require('./reader');
 
 const MangaManage = require('../modules/manga_manage');
 
 const Body = (
     <Router history={createHashHistory()}>
-        <Route path='/' component={Main}>
-            <IndexRoute component={BookList} />
-            <Route path='import' component={ImportManage} />
-        </Route>
+        <Route path='/' component={Main} />
         <Route path='/reader/:hashId' component={Reader} />
     </Router>
 )
 
-MangaManage.readConfigFile().then(result => {
+MangaManage.readConfigFile().then(() => {
     ReactDOM.render(Body, document.querySelector('.body'));
 });
 

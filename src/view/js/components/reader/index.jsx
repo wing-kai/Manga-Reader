@@ -1,6 +1,5 @@
 const React = require('react');
 const { Link } = require('react-router');
-const { MainContext } = require('../context');
 const { VIEW_MODE, READ_MODE } = require('./constants');
 const MangaManage = require('../../modules/manga_manage');
 const { remote } = require('electron');
@@ -9,8 +8,6 @@ const { Menu, MenuItem } = remote;
 let manga;
 
 const Reader = React.createClass({
-
-    contextTypes: Object.assign({}, MainContext),
 
     getInitialState() {
 
@@ -39,18 +36,18 @@ const Reader = React.createClass({
             || thisState.pageNum === thisState.pageList.length - 1 // 封底
         ) {
             wrapContent = (
-                <div className="wrap default" ref='wrap'>
+                <div className="wrap default" id='wrap'>
                     <img src={thisState.pageList[thisState.pageNum]} alt={thisState.pageNum} />
                 </div>
             )
         } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
             wrapContent = (
-                <div className="wrap double" ref='wrap'>
+                <div className="wrap double" id='wrap'>
                     {
                         thisState.readMode === READ_MODE.TRADITION ? [
                             <img
                                 style={this.state.imgBStyle}
-                                ref='imgB'
+                                id='imgB'
                                 key='imgB'
                                 onLoad={this.handleImageLoaded.bind(this, "B")}
                                 src={thisState.pageList[thisState.pageNum+1]}
@@ -58,7 +55,7 @@ const Reader = React.createClass({
                             />,
                             <img
                                 style={this.state.imgAStyle}
-                                ref='imgA'
+                                id='imgA'
                                 key='imgA'
                                 onLoad={this.handleImageLoaded.bind(this, "A")}
                                 src={thisState.pageList[thisState.pageNum]}
@@ -67,7 +64,7 @@ const Reader = React.createClass({
                         ] : [
                             <img
                                 style={this.state.imgAStyle}
-                                ref='imgA'
+                                id='imgA'
                                 key='imgA'
                                 onLoad={this.handleImageLoaded.bind(this, "A")}
                                 src={thisState.pageList[thisState.pageNum]}
@@ -75,7 +72,7 @@ const Reader = React.createClass({
                             />,
                             <img
                                 style={this.state.imgBStyle}
-                                ref='imgB'
+                                id='imgB'
                                 key='imgB'
                                 onLoad={this.handleImageLoaded.bind(this, "B")}
                                 src={thisState.pageList[thisState.pageNum+1]}
@@ -90,11 +87,11 @@ const Reader = React.createClass({
         }
 
         return (
-            <div className="page-container">
+            <div className="page-container" style={{background:"#000"}}>
                 {wrapContent}
                 <div className='control-bar'>
                     <Link to="/" className='btn'>退出</Link>
-                    <button className='btn' onClick={this.handleClickViewModeSwitch} ref="btnViewModeSwitch">阅读</button>
+                    <button className='btn' onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch">阅读</button>
                     {
                         (thisState.viewMode === VIEW_MODE.DOUBLE) && (thisState.readMode === READ_MODE.TRADITION) ? [
                             <button key='nextpage' className='btn turn right' onClick={this.handleClickNextPage}>下一页</button>,
@@ -111,7 +108,7 @@ const Reader = React.createClass({
                         className='btn'
                         disabled={thisState.viewMode !== VIEW_MODE.DOUBLE}
                         onClick={this.handleClickReadModeSwitch}
-                        ref="btnReadModeSwitch"
+                        id="btnReadModeSwitch"
                     >
                         模式
                     </button>
@@ -125,7 +122,7 @@ const Reader = React.createClass({
         const that = this;
         const thisState = this.state;
         const menu = new Menu();
-        const boundingClientRect = this.refs.btnReadModeSwitch.getBoundingClientRect();
+        const boundingClientRect = document.getElementById('btnReadModeSwitch').getBoundingClientRect();
 
         menu.append(new MenuItem({
             label: '传统',
@@ -156,7 +153,7 @@ const Reader = React.createClass({
         const that = this;
         const thisState = this.state;
         const menu = new Menu();
-        const boundingClientRect = this.refs.btnViewModeSwitch.getBoundingClientRect();
+        const boundingClientRect = document.getElementById('btnViewModeSwitch').getBoundingClientRect();
 
         menu.append(new MenuItem({
             label: '单页',
@@ -207,7 +204,7 @@ const Reader = React.createClass({
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleScaleImage);
-        MangaManage.saveMangaConfig();
+        MangaManage.saveConfig();
         manga = undefined;
     },
 
@@ -237,8 +234,9 @@ const Reader = React.createClass({
 
     handleScaleImage() {
 
-        const thisRefs = this.refs;
-        const { wrap, imgA, imgB } = thisRefs;
+        const wrap = document.getElementById("wrap");
+        const imgA = document.getElementById("imgA");
+        const imgB = document.getElementById("imgB");
 
         let newImgAStyle = {};
         let newImgBStyle = {};

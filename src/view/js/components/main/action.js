@@ -1,12 +1,9 @@
 const getAction = (Flux) => (
     Flux.createAction( next => ({
-        showSideBar() {
-            next()
-        },
-        hideSideBar() {
-            next()
+        getMangaInfo(selectedDirectories) {
+            next(selectedDirectories)
         }
     }))
 )
 
-module.exports = getAction
+module.exports = getAction;
