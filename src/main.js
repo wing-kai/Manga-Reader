@@ -7,7 +7,44 @@ const { app, BrowserWindow, ipcMain, dialog } = electron;
 
 electron.crashReporter.start();
 
-let mainWindow;
+let mainWindow, readerWindow;
+let stateCache = false;
+let hashCache = false;
+
+const openMainWindow = () => {
+    mainWindow = new BrowserWindow({
+        center: true,
+        minWidth: 800,
+        minHeight: 600,
+        titleBarStyle: 'hidden', // OS X only
+        title: 'Manga-Reader'
+    });
+
+    mainWindow.webContents.openDevTools();
+    mainWindow.loadURL(`file://${__dirname}/view/html/index.html`);
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+}
+
+const openReaderWindow = () => {
+    readerWindow = new BrowserWindow({
+        center: true,
+        width: 460,
+        height: 690,
+        minWidth: 460,
+        minHeight: 690,
+        frame: false
+    });
+
+    readerWindow.webContents.openDevTools();
+    readerWindow.loadURL(`file://${__dirname}/view/html/reader.html`);
+
+    readerWindow.on('closed', () => {
+        readerWindow = null;
+    });    
+}
 
 ipcMain.on('show-directory-selector', event => {
     /**
@@ -47,24 +84,25 @@ ipcMain.on('show-authro-info', () => {
     });
 });
 
-ipcMain.on('quit', app.quit);
-
-// disable zoom
-app.commandLine.appendSwitch('--enable-viewport-meta', 'true');
-
-app.on('ready', () => {
-    mainWindow = new BrowserWindow({
-        center: true,
-        minWidth: 800,
-        minHeight: 600,
-        titleBarStyle: 'hidden', // OS X only
-        title: 'Manga-Reader'
-    });
-
-    mainWindow.webContents.openDevTools();
-    mainWindow.loadURL(`file://${__dirname}/view/html/index.html`);
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });    
+ipcMain.on('selected-manga', (event, hash, state) => {
+    stateCache = state;
+    hashCache = hash;
+    mainWindow.close();
+    openReaderWindow();
 });
+
+ipcMain.on('get-stateCache', event => {
+    event.returnValue = stateCache;
+});
+
+ipcMain.on('get-hashCache', event => {
+    event.returnValue = hashCache;
+});
+
+ipcMain.on('quit-reader', () => {
+    readerWindow.close();
+    openMainWindow();
+});
+
+ipcMain.on('quit', app.quit);
+app.on('ready', openMainWindow);

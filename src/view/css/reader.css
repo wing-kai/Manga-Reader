@@ -69,14 +69,19 @@
 }
 
 .page-container .wrap.default {
+    flex: 1;
     height: inherit;
     width: inherit;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .page-container .wrap.default > img {
-    height: inherit;
-    width: auto;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    flex: 1;
 }
 
 .page-container .wrap.double {

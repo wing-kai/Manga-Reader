@@ -1,5 +1,5 @@
 const React = require('react');
-const { Link } = require('react-router');
+const ReactDOM = require('react-dom');
 const EasyFlux = require('easy-flux' );
 const { remote, ipcRenderer, webFrame } = require('electron');
 const { Menu, MenuItem } = remote;
@@ -45,9 +45,11 @@ const BookCase = React.createClass({
                 title={manga.get("title")}
                 onContextMenu={this.handleRightClick.bind(that, manga)}
             >
-                <Link to={"/reader/" + manga.get("hash")}>
-                    <img src={manga.get("path") + '/' + manga.get("cover")} alt={manga.get("title")} />
-                </Link>
+                <img
+                    src={manga.get("path") + '/' + manga.get("cover")}
+                    alt={manga.get("title")}
+                    onClick={this.handleClickMangaWrap.bind(that, manga.get("hash"))}
+                />
             </div>
         ));
 
@@ -71,6 +73,10 @@ const BookCase = React.createClass({
                 }
             </div>
         )
+    },
+
+    handleClickMangaWrap(hash) {
+        this.props.readManga(hash);
     },
 
     handleRightClick(manga) {
@@ -125,7 +131,8 @@ const BookCase = React.createClass({
 const Main = React.createClass({
 
     getInitialState() {
-        return {
+        const stateCache = ipcRenderer.sendSync('get-stateCache');
+        return stateCache ? stateCache : {
             sideBar: SIDE_BAR.ALL,
             categories: MangaManage.getCategory(),
             authors: [],
@@ -143,9 +150,9 @@ const Main = React.createClass({
             || (thisState.sideBar === SIDE_BAR.CATEGORIES && thisState.selectedCategory === 0)
             || (thisState.sideBar === SIDE_BAR.AUTHOR && thisState.selectedAuthor === 0)
         ) {
-            BookCaseContent = <BookCase parentForceUpdate={this.handleForceUpdate} list={MangaManage.getMangaListCopy()} handleExport={this.handleClickExportBtn} />
+            BookCaseContent = <BookCase readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} list={MangaManage.getMangaListCopy()} handleExport={this.handleClickExportBtn} />
         } else if (thisState.sideBar === SIDE_BAR.CATEGORIES) {
-            BookCaseContent = <BookCase parentForceUpdate={this.handleForceUpdate} category={thisState.selectedCategory} list={MangaManage.getCategory(thisState.selectedCategory)} />
+            BookCaseContent = <BookCase readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} category={thisState.selectedCategory} list={MangaManage.getCategory(thisState.selectedCategory)} />
         } else { // thisState.sideBar === SIDE_BAR.AUTHOR
 
         }
@@ -208,6 +215,10 @@ const Main = React.createClass({
     
     componentWillUnmount() {
         Store.listenOff(this.storeListener);
+    },
+
+    handleSelectedManga(hash) {
+        ipcRenderer.send('selected-manga', hash, this.state);
     },
 
     handleClickSidebarBtn(btnName) {
@@ -302,4 +313,6 @@ const Main = React.createClass({
     }
 });
 
-module.exports = Main
+MangaManage.readConfigFile().then(() => {
+    ReactDOM.render(<Main />, document.querySelector('.body'));
+});

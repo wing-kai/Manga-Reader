@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="../css/reader.css" />
     <link rel="stylesheet" href="../css/iconfont.css" />
     <style>
-    html, body, .body { -webkit-app-region: drag; padding: 0; margin: 0; height: 100%; width: 100%; overflow: hidden; }
     .home { display: flex; height: 100%; width: 100%; flex-direction: column; }
     .header { background: #000; flex-basis: 22px; }
     .container { display: flex; flex: 1; }
@@ -37,8 +36,8 @@
     </style>
 </head>
 
-<body onselectstart="return false">
+<body onselectstart="return false" style="background:#000">
     <div class="body"></div>
-    <script>require('../js/components')</script>
+    <script>require('../js/components/main')</script>
 </body>
 </html>

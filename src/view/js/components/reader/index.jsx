@@ -1,17 +1,20 @@
 const React = require('react');
-const { Link } = require('react-router');
+const ReactDOM = require('react-dom');
 const { VIEW_MODE, READ_MODE } = require('./constants');
 const MangaManage = require('../../modules/manga_manage');
-const { remote } = require('electron');
+const { remote, ipcRenderer, webFrame } = require('electron');
 const { Menu, MenuItem } = remote;
 
 let manga;
+
+// disable zoom
+webFrame.setZoomLevelLimits(1, 1);
 
 const Reader = React.createClass({
 
     getInitialState() {
 
-        manga = MangaManage.getManga(this.props.params.hashId);
+        manga = MangaManage.getManga(ipcRenderer.sendSync('get-hashCache'));
 
         return {
             pageList: manga ? manga.getPageFile() : [],
@@ -90,7 +93,7 @@ const Reader = React.createClass({
             <div className="page-container" style={{background:"#000"}}>
                 {wrapContent}
                 <div className='control-bar'>
-                    <Link to="/" className='btn'>退出</Link>
+                    <a onClick={this.handleQuitReader} className='btn'>退出</a>
                     <button className='btn' onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch">阅读</button>
                     {
                         (thisState.viewMode === VIEW_MODE.DOUBLE) && (thisState.readMode === READ_MODE.TRADITION) ? [
@@ -115,6 +118,10 @@ const Reader = React.createClass({
                 </div>
             </div>
         )
+    },
+
+    handleQuitReader() {
+        ipcRenderer.send('quit-reader');
     },
 
     handleClickReadModeSwitch() {
@@ -197,8 +204,8 @@ const Reader = React.createClass({
         menu.popup(remote.getCurrentWindow(), Number(boundingClientRect.left.toFixed(0)), boundingClientRect.top);
     },
 
-    componentWillUpdate() {
-        if (this.state.viewMode !== VIEW_MODE.DOUBLE)
+    componentWillUpdate(nextProps, nextState) {
+        if (nextState.viewMode !== VIEW_MODE.DOUBLE)
             window.removeEventListener('resize', this.handleScaleImage);
     },
 
@@ -304,4 +311,6 @@ const Reader = React.createClass({
     }
 })
 
-module.exports = Reader;
+MangaManage.readConfigFile().then(() => {
+    ReactDOM.render(<Reader />, document.querySelector('.body'));
+});
