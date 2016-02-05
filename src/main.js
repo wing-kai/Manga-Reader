@@ -94,9 +94,20 @@ ipcMain.on('selected-manga', (event, hash, state) => {
 ipcMain.on('get-stateCache', event => {
     event.returnValue = stateCache;
 });
-
 ipcMain.on('get-hashCache', event => {
     event.returnValue = hashCache;
+});
+
+ipcMain.on('title-bar-close', event => {
+    mainWindow ? mainWindow.close() : readerWindow.close();
+});
+ipcMain.on('title-bar-minimize', event => {
+    mainWindow ? mainWindow.minimize() : readerWindow.minimize();
+});
+ipcMain.on('title-bar-full-screen', event => {
+    mainWindow
+    ? mainWindow.setFullScreen(!mainWindow.isFullScreen())
+    : readerWindow.setFullScreen(!readerWindow.isFullScreen())
 });
 
 ipcMain.on('quit-reader', () => {

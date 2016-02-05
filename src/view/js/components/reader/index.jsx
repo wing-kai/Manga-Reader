@@ -1,13 +1,16 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const { VIEW_MODE, READ_MODE } = require('./constants');
-const MangaManage = require('../../modules/manga_manage');
 const { remote, ipcRenderer, webFrame } = require('electron');
+
+const TitleBarManage = require("../title_bar");
+
+const { VIEW_MODE, READ_MODE } = require('./constants');
+
+const MangaManage = require('../../modules/manga_manage');
 const { Menu, MenuItem } = remote;
 
 let manga;
 
-// disable zoom
 webFrame.setZoomLevelLimits(1, 1);
 
 const Reader = React.createClass({
@@ -91,37 +94,63 @@ const Reader = React.createClass({
 
         return (
             <div className="page-container" style={{background:"#000"}}>
-                {wrapContent}
-                <div className='control-bar'>
-                    <a onClick={this.handleQuitReader} className='btn'>退出</a>
-                    <button className='btn' onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch">阅读</button>
-                    {
-                        (thisState.viewMode === VIEW_MODE.DOUBLE) && (thisState.readMode === READ_MODE.TRADITION) ? [
-                            <button key='nextpage' className='btn turn right' onClick={this.handleClickNextPage}>下一页</button>,
-                            <input key='input' type="text" value={thisState.pageNum + 1} disabled={true} />,
-                            <button key='previouspage' className='btn turn left' onClick={this.handleClickPreviousPage}>上一页</button>
-                        ] : [
-                            <button key='previouspage' className='btn turn left' onClick={this.handleClickPreviousPage}>上一页</button>,
-                            <input key='input' type="text" value={thisState.pageNum + 1} disabled={true} />,
-                            <button key='nextpage' className='btn turn right' onClick={this.handleClickNextPage}>下一页</button>
-                        ]
-                    }
-                    <button className='btn' disabled={true}>书签</button>
-                    <button
-                        className='btn'
-                        disabled={thisState.viewMode !== VIEW_MODE.DOUBLE}
-                        onClick={this.handleClickReadModeSwitch}
-                        id="btnReadModeSwitch"
-                    >
-                        模式
-                    </button>
+                <div className="control-bar">
+                    <div>
+                        <button className="icon ico-log-out" title="退出" onClick={this.handleQuitReader} />
+                        <button className="icon ico-eye" title="阅读" onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch" />
+                        {
+                            (thisState.viewMode === VIEW_MODE.DOUBLE) && (thisState.readMode === READ_MODE.TRADITION) ? [
+                                <button className="icon ico-triangle-left" title="下一页" onClick={this.handleClickNextPage} key="next-page" />,
+                                <button className="icon ico-triangle-right" title="上一页" onClick={this.handleClickPreviousPage} key="previous-page" />
+                            ] : [
+                                <button className="icon ico-triangle-left" title="上一页" onClick={this.handleClickPreviousPage} key="previous-page" />,
+                                <button className="icon ico-triangle-right" title="下一页" onClick={this.handleClickNextPage} key="next-page" />
+                            ]
+                        }
+                        <button className="icon ico-ccw" title="逆时针旋转90度" disabled={true} />
+                        <button className="icon ico-cw" title="顺时针旋转90度" disabled={true} />
+                        <button className="icon ico-tag" title="书签" disabled={true} />
+                        <button
+                            className="icon ico-level-down"
+                            title="翻页模式"
+                            id="btnReadModeSwitch"
+                            onClick={this.handleClickReadModeSwitch}
+                            disabled={thisState.viewMode !== VIEW_MODE.DOUBLE}
+                        />
+                    </div>
+                    <div>
+                        <input
+                            id="page-range"
+                            type="range"
+                            defaultValue={thisState.pageNum}
+                            min='0'
+                            max={thisState.pageList.length - 1}
+                            step={thisState.viewMode === VIEW_MODE.SINGLE ? 1 : 2}
+                            value={thisState.pageNum}
+                            onChange={this.handleDragPageRange}
+                        />
+                    </div>
                 </div>
+                {wrapContent}
             </div>
+        )
+    },
+
+    componentDidMount() {
+        const TitleBar = TitleBarManage.getComponent();
+        TitleBarManage.renderComponent(
+            <TitleBar handleClose={this.handleQuitReader} />
         )
     },
 
     handleQuitReader() {
         ipcRenderer.send('quit-reader');
+    },
+
+    handleDragPageRange() {
+        this.setState({
+            pageNum: document.getElementById("page-range").value
+        })
     },
 
     handleClickReadModeSwitch() {
@@ -211,7 +240,6 @@ const Reader = React.createClass({
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleScaleImage);
-        MangaManage.saveConfig();
         manga = undefined;
     },
 
@@ -287,6 +315,7 @@ const Reader = React.createClass({
         }
 
         manga.set({ lastReaded: newState.pageNum });
+        MangaManage.saveConfig();
         this.setState(newState);
     },
 
@@ -307,6 +336,7 @@ const Reader = React.createClass({
         }
 
         manga.set({ lastReaded: newState.pageNum });
+        MangaManage.saveConfig();
         this.setState(newState);
     }
 })

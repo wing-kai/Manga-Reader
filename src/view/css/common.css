@@ -1,2 +1,12 @@
-* { outline: none; cursor: default; font-family: 'Segoe WPC', 'Segoe UI', SFUIText-Light, HelveticaNeue-Light, sans-serif, 'Droid Sans Fallback'; }
-html, body, .body { -webkit-app-region: drag; padding: 0; margin: 0; height: 100%; width: 100%; overflow: hidden; }
+* {
+    outline: none;
+    cursor: default;
+    font-family: 'Segoe WPC', 'Segoe UI', SFUIText-Light, HelveticaNeue-Light, sans-serif, 'Droid Sans Fallback';
+}
+html, body, .body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}

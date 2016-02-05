@@ -1,0 +1,117 @@
+.title-bar-wrap {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 24px;
+}
+
+.title-bar {
+    width: 100%;
+    height: 24px;
+    padding: 0 3px;
+    background: #000;
+    -webkit-app-region: drag;
+}
+
+.title-bar .btn-wrap {
+    width: 57px;
+    display: inline-block;
+}
+
+.title-bar button {
+    width: 11px;
+    height: 11px;
+    border: solid 1px;
+    border-radius: 6px;
+    margin: 6px 4px 6px;
+    padding: 0;
+    position: relative;
+}
+
+.title-bar button:before,
+.title-bar button:after {
+    opacity: 0;
+    position: absolute;
+    display: block;
+    content: ' ';
+}
+.title-bar .btn-wrap:hover button:not(:disabled):before,
+.title-bar .btn-wrap:hover button:not(:disabled):after {
+    opacity: 1;
+}
+
+.title-bar button:disabled {
+    background-color: #cfcfcf;
+}
+
+.title-bar button.close {
+    background-color: #FC5753;
+    border-color: #E7504D;
+}
+.title-bar button.close:active {
+    background-color: #BD4945;
+    border-color: #B23C39;
+}
+
+.title-bar button.minimize {
+    background-color: #FDBC40;
+    border-color: #E7A939;
+}
+.title-bar button.minimize:active {
+    background-color: #BE9130;
+    border-color: #B48530;
+}
+
+.title-bar button.full-screen {
+    background-color: #30C45A;
+    border-color: #2AB73C;
+}
+.title-bar button.full-screen:active {
+    background-color: #279A38;
+    border-color: #248B30;
+}
+
+.title-bar button.close:before,
+.title-bar button.close:after {
+    width: 7px;
+    height: 1px;
+    left: 1px;
+    top: 4px;
+    background-color: #5A0507;
+}
+.title-bar button.close:before {
+    transform: rotate(45deg);
+}
+.title-bar button.close:after {
+    transform: rotate(-45deg);
+}
+
+.title-bar button.minimize:before {
+    width: 7px;
+    height: 1px;
+    top: 4px;
+    left: 1px;
+    background-color: #92510F;
+}
+
+.title-bar button.full-screen:before,
+.title-bar button.full-screen:after {
+    height: 0;
+    width: 0;
+    border: solid 2px #0A620B;
+}
+
+.title-bar button.full-screen:before {
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    top: 2px;
+    right: 2px;
+}
+.title-bar button.full-screen:after {
+    border-top-color: transparent;
+    border-right-color: transparent;
+    bottom: 2px;
+    left: 2px;
+}

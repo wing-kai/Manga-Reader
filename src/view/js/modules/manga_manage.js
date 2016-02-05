@@ -153,6 +153,7 @@ const addCategory = name => {
     if (!Categories.some(category => category.id === newCategory.id))
         Categories = Categories.push(newCategory);
 
+    saveConfig();
     return Categories.toJS();
 }
 
@@ -165,6 +166,7 @@ const getCategory = (hash = false) => {
             )
         );
     }
+
     return Categories.toJS();
 }
 
@@ -177,6 +179,7 @@ const deleteCategory = hash => {
             )
         })
     )
+
     saveConfig();
     return Categories.toJS();
 }
