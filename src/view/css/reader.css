@@ -69,6 +69,26 @@ body:hover .control-bar {
     background: #fff;
 }
 
+.control-bar .page-num {
+    position: absolute;
+    left: 50%;
+    top: -50px;
+    background: rgba(60,60,60,.7);
+    width: 40px;
+    transform: translateX(-20px);
+    text-align: center;
+    height: 40px;
+    line-height: 40px;
+    color: #fff;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.control-bar input[type=range]:hover+.page-num {
+    opacity: 1;
+}
+
 .page-container {
     height: inherit;
     width: inherit;
@@ -84,17 +104,10 @@ body:hover .control-bar {
     justify-content: center;
     align-items: center;
 }
-.page-container .wrap.default > img {
+.page-container .wrap.default > img,
+.page-container .wrap.default > canvas {
     max-height: 100%;
     max-width: 100%;
     object-fit: contain;
     flex: 1;
-}
-.page-container .wrap.double {
-    width: inherit;
-}
-.page-container .wrap.double > img {
-    height: 100%;
-}
-.page-container .wrap.waterfall {
 }

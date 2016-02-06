@@ -23,11 +23,11 @@ const Reader = React.createClass({
             pageList: manga ? manga.getPageFile() : [],
             pageNum: manga.get('lastReaded'),
             viewMode: manga.get('viewMode'),
-            readMode: READ_MODE.TRADITION,
-            imgALoaded: false,
-            imgBLoaded: false,
-            imgAStyle: {},
-            imgBStyle: {}
+            readMode: READ_MODE.MORDEN,
+            canvasStyle: {
+                width: 0,
+                height: 0
+            },
         }
     },
 
@@ -48,44 +48,8 @@ const Reader = React.createClass({
             )
         } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
             wrapContent = (
-                <div className="wrap double" id='wrap'>
-                    {
-                        thisState.readMode === READ_MODE.TRADITION ? [
-                            <img
-                                style={this.state.imgBStyle}
-                                id='imgB'
-                                key='imgB'
-                                onLoad={this.handleImageLoaded.bind(this, "B")}
-                                src={thisState.pageList[thisState.pageNum+1]}
-                                alt={thisState.pageNum}
-                            />,
-                            <img
-                                style={this.state.imgAStyle}
-                                id='imgA'
-                                key='imgA'
-                                onLoad={this.handleImageLoaded.bind(this, "A")}
-                                src={thisState.pageList[thisState.pageNum]}
-                                alt={thisState.pageNum}
-                            />
-                        ] : [
-                            <img
-                                style={this.state.imgAStyle}
-                                id='imgA'
-                                key='imgA'
-                                onLoad={this.handleImageLoaded.bind(this, "A")}
-                                src={thisState.pageList[thisState.pageNum]}
-                                alt={thisState.pageNum}
-                            />,
-                            <img
-                                style={this.state.imgBStyle}
-                                id='imgB'
-                                key='imgB'
-                                onLoad={this.handleImageLoaded.bind(this, "B")}
-                                src={thisState.pageList[thisState.pageNum+1]}
-                                alt={thisState.pageNum}
-                            />
-                        ]
-                    }
+                <div id="wrap" className="wrap default">
+                    <canvas id="canvas" width={thisState.canvasStyle.width} height={thisState.canvasStyle.height} />
                 </div>
             )
         } else {
@@ -99,7 +63,7 @@ const Reader = React.createClass({
                         <button className="icon ico-log-out" title="退出" onClick={this.handleQuitReader} />
                         <button className="icon ico-eye" title="阅读" onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch" />
                         {
-                            (thisState.viewMode === VIEW_MODE.DOUBLE) && (thisState.readMode === READ_MODE.TRADITION) ? [
+                            thisState.readMode === READ_MODE.TRADITION ? [
                                 <button className="icon ico-triangle-left" title="下一页" onClick={this.handleClickNextPage} key="next-page" />,
                                 <button className="icon ico-triangle-right" title="上一页" onClick={this.handleClickPreviousPage} key="previous-page" />
                             ] : [
@@ -111,24 +75,23 @@ const Reader = React.createClass({
                         <button className="icon ico-cw" title="顺时针旋转90度" disabled={true} />
                         <button className="icon ico-tag" title="书签" disabled={true} />
                         <button
-                            className="icon ico-level-down"
+                            className={"icon " + (thisState.readMode === READ_MODE.MORDEN ? "ico-level-down" : "ico-level-up")}
                             title="翻页模式"
                             id="btnReadModeSwitch"
                             onClick={this.handleClickReadModeSwitch}
-                            disabled={thisState.viewMode !== VIEW_MODE.DOUBLE}
                         />
                     </div>
                     <div>
                         <input
                             id="page-range"
                             type="range"
-                            defaultValue={thisState.pageNum}
-                            min='0'
+                            min={thisState.pageList.length % 2 === 0 && (thisState.readMode === READ_MODE.TRADITION) ? 1 : 0}
                             max={thisState.pageList.length - 1}
                             step={thisState.viewMode === VIEW_MODE.SINGLE ? 1 : 2}
-                            value={thisState.pageNum}
+                            value={thisState.readMode === READ_MODE.MORDEN ? thisState.pageNum : thisState.pageList.length - thisState.pageNum - 1}
                             onChange={this.handleDragPageRange}
                         />
+                        <div className="page-num">{thisState.pageNum + 1}</div>
                     </div>
                 </div>
                 {wrapContent}
@@ -138,21 +101,101 @@ const Reader = React.createClass({
 
     componentDidMount() {
         const TitleBar = TitleBarManage.getComponent();
+        const thisState = this.state;
+        const that = this;
+
         TitleBarManage.renderComponent(
             <TitleBar handleClose={this.handleQuitReader} />
-        )
+        );
+
+        if (thisState.viewMode === VIEW_MODE.DOUBLE) {
+            this.handleDrawCanvas();
+        }
+
+        window.addEventListener('keydown', event => {
+            if (that.state.readMode === READ_MODE.MORDEN) {
+                if (event.keyIdentifier === "Up" || event.keyIdentifier === "Left")
+                    that.handleClickPreviousPage();
+                else
+                    that.handleClickNextPage();
+            } else {
+                if (event.keyIdentifier === "Down" || event.keyIdentifier === "Left")
+                    that.handleClickNextPage();
+                else
+                    that.handleClickPreviousPage();
+            }
+        });
     },
 
+    handleDrawCanvas() {
+        const that = this;
+        const thisState = this.state;
+        const imgA = new Image();
+        const imgB = new Image();
+
+        if (
+            thisState.viewMode !== VIEW_MODE.DOUBLE
+            || thisState.pageNum === 0 // 封面
+            || thisState.pageNum === thisState.pageList.length - 1 // 封底
+        )
+            return;
+
+        imgA.src = thisState.pageList[thisState.pageNum];
+        imgB.src = thisState.pageList[thisState.pageNum+1];
+
+        Promise.all([
+            new Promise(resolve => { imgA.onload = resolve }),
+            new Promise(resolve => { imgB.onload = resolve })
+        ]).then(() => {
+            imgB.width = +(imgA.height * imgB.width / imgB.height).toFixed(0);
+            imgB.height = imgA.height;
+            return new Promise(resolve => {
+                that.setState({
+                    canvasStyle: {
+                        width: imgA.width + imgB.width,
+                        height: imgA.height
+                    }
+                }, resolve);
+            });
+        }).then(() => {
+            if (document.getElementById("canvas")) {
+                const canvas = document.getElementById("canvas").getContext('2d');
+                canvas.clearRect(0, 0, 9999, 9999);
+                if (thisState.readMode === READ_MODE.MORDEN) {
+                    canvas.drawImage(imgA, 0, 0);
+                    canvas.drawImage(imgB, imgA.width, 0, imgB.width, imgB.height);
+                } else {
+                    canvas.drawImage(imgB, 0, 0);
+                    canvas.drawImage(imgA, imgB.width, 0, imgA.width, imgA.height);
+                }
+            }
+        });
+    },
+
+    // 退出阅读器
     handleQuitReader() {
         ipcRenderer.send('quit-reader');
     },
 
+    // 拖动页码滑块
     handleDragPageRange() {
+
+        let newPageNum = 0;
+        const thisState = this.state;
+
+        if (thisState.readMode === READ_MODE.TRADITION)
+            newPageNum = thisState.pageList.length - 1 - (+document.getElementById("page-range").value)
+        else
+            newPageNum = +document.getElementById("page-range").value;
+
+        manga.set({ lastReaded: newPageNum });
+        MangaManage.saveConfig();
         this.setState({
-            pageNum: document.getElementById("page-range").value
-        })
+            pageNum: manga.get('lastReaded')
+        }, this.handleDrawCanvas);
     },
 
+    // 切换翻页方向
     handleClickReadModeSwitch() {
 
         const that = this;
@@ -167,7 +210,7 @@ const Reader = React.createClass({
             click: () => {
                 that.setState({
                     readMode: READ_MODE.TRADITION
-                });
+                }, that.handleDrawCanvas);
             }
         }));
         menu.append(new MenuItem({
@@ -177,15 +220,15 @@ const Reader = React.createClass({
             click: () => {
                 that.setState({
                     readMode: READ_MODE.MORDEN
-                });
+                }, that.handleDrawCanvas);
             }
         }));
 
         menu.popup(remote.getCurrentWindow(), Number(boundingClientRect.left.toFixed(0)), boundingClientRect.top);
     },
 
+    // 切换阅读模式
     handleClickViewModeSwitch() {
-
         const that = this;
         const thisState = this.state;
         const menu = new Menu();
@@ -197,6 +240,7 @@ const Reader = React.createClass({
             checked: thisState.viewMode === VIEW_MODE.SINGLE,
             click: () => {
                 manga.set({ viewMode: VIEW_MODE.SINGLE });
+                MangaManage.saveConfig();
                 that.setState({ viewMode: VIEW_MODE.SINGLE });
             }
         }));
@@ -207,95 +251,29 @@ const Reader = React.createClass({
             click: () => {
                 const newState = {
                     viewMode: VIEW_MODE.DOUBLE,
-                    pageNum: thisState.pageNum
+                    pageNum: thisState.pageNum,
+                    canvasStyle: {
+                        width: 0,
+                        height: 0
+                    }
                 }
-                if (newState.pageNum % 2 === 1) {
-                    newState.pageNum--;
+                if (
+                    newState.pageNum > 0
+                    && newState.pageNum < thisState.pageList.length
+                    && newState.pageNum % 2 === 0
+                ) {
+                    --newState.pageNum;
                 }
                 manga.set({
                     viewMode: VIEW_MODE.DOUBLE,
                     lastReaded: newState.pageNum
                 });
-                that.setState(newState);
+                MangaManage.saveConfig();
+                that.setState(newState, this.handleDrawCanvas);
             }
         }));
-        // menu.append(new MenuItem({
-        //     label: '瀑布',
-        //     type: 'checkbox',
-        //     checked: thisState.viewMode === VIEW_MODE.WATERFALL,
-        //     click: () => {
-        //         that.setState({
-        //             viewMode: VIEW_MODE.WATERFALL
-        //         });
-        //     }
-        // }));
 
         menu.popup(remote.getCurrentWindow(), Number(boundingClientRect.left.toFixed(0)), boundingClientRect.top);
-    },
-
-    componentWillUpdate(nextProps, nextState) {
-        if (nextState.viewMode !== VIEW_MODE.DOUBLE)
-            window.removeEventListener('resize', this.handleScaleImage);
-    },
-
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.handleScaleImage);
-        manga = undefined;
-    },
-
-    handleImageLoaded(order) {
-
-        let that = this;
-        let thisState = this.state;
-
-        let setState = new Promise(resolve => {
-            let newState = {};
-
-            if (order === 'A')
-                newState.imgALoaded = true;
-            else
-                newState.imgBLoaded = true;
-
-            that.setState(newState, resolve);
-        });
-
-        setState.then(() => {
-            if (thisState.imgALoaded === thisState.imgBLoaded === true) {
-                that.handleScaleImage();
-                window.addEventListener('resize', that.handleScaleImage);
-            }
-        });
-    },
-
-    handleScaleImage() {
-
-        const wrap = document.getElementById("wrap");
-        const imgA = document.getElementById("imgA");
-        const imgB = document.getElementById("imgB");
-
-        let newImgAStyle = {};
-        let newImgBStyle = {};
-
-        newImgBStyle.height = imgA.height;
-        newImgBStyle.width  = imgA.height * imgB.width / imgB.height;
-
-        const z = (imgA.width + newImgBStyle.width) / wrap.clientWidth;
-        const getNewLength = (len) => +(len/z).toFixed(0);
-
-        newImgAStyle = {
-            width:  getNewLength(imgA.width),
-            height: getNewLength(imgA.height)
-        }
-
-        newImgBStyle = {
-            width:  getNewLength(newImgBStyle.width),
-            height: getNewLength(newImgBStyle.height)
-        }
-
-        this.setState({
-            imgAStyle: newImgAStyle,
-            imgBStyle: newImgBStyle
-        });
     },
 
     handleClickPreviousPage() {
@@ -316,7 +294,7 @@ const Reader = React.createClass({
 
         manga.set({ lastReaded: newState.pageNum });
         MangaManage.saveConfig();
-        this.setState(newState);
+        this.setState(newState, this.handleDrawCanvas);
     },
 
     handleClickNextPage() {
@@ -325,11 +303,12 @@ const Reader = React.createClass({
             pageNum: thisState.pageNum
         }
 
-        if (thisState.pageNum !== thisState.pageList.length - 1) {
+        if (thisState.pageNum < thisState.pageList.length - 1) {
             if (thisState.viewMode === VIEW_MODE.SINGLE) {
                 newState.pageNum++;
             } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
-                newState.pageNum = newState.pageNum === 0 ? 1 : newState.pageNum + 2;
+                if (thisState.pageNum < thisState.pageList.length - 2)
+                    newState.pageNum = newState.pageNum === 0 ? 1 : newState.pageNum + 2;
             } else {
                 // waterfall...
             }
@@ -337,7 +316,7 @@ const Reader = React.createClass({
 
         manga.set({ lastReaded: newState.pageNum });
         MangaManage.saveConfig();
-        this.setState(newState);
+        this.setState(newState, this.handleDrawCanvas);
     }
 })
 

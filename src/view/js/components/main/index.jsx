@@ -165,25 +165,32 @@ const Main = React.createClass({
                         <button
                             className={"icon ico-box" + (thisState.sideBar === SIDE_BAR.ALL ? " active" : "")}
                             onClick={this.handleClickSidebarBtn.bind(this, SIDE_BAR.ALL)}
+                            title="资料库"
                         />
                         <button
                             className={"icon ico-users" + (thisState.sideBar === SIDE_BAR.AUTHOR ? " active" : "")}
                             onClick={this.handleClickSidebarBtn.bind(this, SIDE_BAR.AUTHOR)}
                             disabled={true}
+                            style={{display:'none'}}
+                            title="按作者查看"
                         />
                         <button
                             className={"icon ico-list" + (thisState.sideBar === SIDE_BAR.CATEGORIES ? " active" : "")}
                             onClick={this.handleClickSidebarBtn.bind(this, SIDE_BAR.CATEGORIES)}
+                            title="按分类查看"
                         />
                         <div style={{flex:1}}></div>
                         <button
                             className={"icon ico-plus" + (thisState.sideBar === SIDE_BAR.EXPORT ? " active" : "")}
                             onClick={this.handleClickExportBtn}
+                            title="导入漫画"
                         />
                         <button
                             className={"icon ico-cog" + (thisState.sideBar === SIDE_BAR.CONFIG ? " active" : "")}
                             onClick={this.handleClickSidebarBtn.bind(this, SIDE_BAR.CONFIG)}
                             disabled={true}
+                            style={{display:'none'}}
+                            title="设置"
                         />
                     </div>
                     {
