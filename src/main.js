@@ -43,7 +43,15 @@ const openReaderWindow = () => {
 
     readerWindow.on('closed', () => {
         readerWindow = null;
-    });    
+    });
+
+    readerWindow.on('enter-full-screen', event => {
+        event.sender.send('is-full-screen-reply', true);
+    });
+
+    readerWindow.on('leave-full-screen', event => {
+        event.sender.send('is-full-screen-reply', false);
+    });
 }
 
 ipcMain.on('show-directory-selector', event => {
@@ -92,10 +100,10 @@ ipcMain.on('selected-manga', (event, hash, state) => {
 });
 
 ipcMain.on('get-stateCache', event => {
-    event.returnValue = stateCache;
+    event.sender.send('get-stateCache-reply', stateCache);
 });
 ipcMain.on('get-hashCache', event => {
-    event.returnValue = hashCache;
+    event.sender.send('get-hashCache-reply', hashCache);
 });
 
 ipcMain.on('title-bar-close', event => {

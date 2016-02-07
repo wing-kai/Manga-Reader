@@ -14,6 +14,8 @@ const Flux = new EasyFlux({ dev: true });
 const Action = getAction(Flux);
 const Store = getStore(Flux);
 
+let stateCache;
+
 const SIDE_BAR = {
     ALL: "SIDE_BAR_ALL",
     AUTHOR: "SIDE_BAR_AUTHOR",
@@ -128,10 +130,9 @@ const BookCase = React.createClass({
     }
 });
 
-const Main = React.createClass({
+const getMainComponent = stateCache => React.createClass({
 
     getInitialState() {
-        const stateCache = ipcRenderer.sendSync('get-stateCache');
         return stateCache ? stateCache : {
             sideBar: SIDE_BAR.ALL,
             categories: MangaManage.getCategory(),
@@ -320,6 +321,10 @@ const Main = React.createClass({
     }
 });
 
-MangaManage.readConfigFile().then(() => {
-    ReactDOM.render(<Main />, document.querySelector('.body'));
+ipcRenderer.once('get-stateCache-reply', (event, cache) => {
+    MangaManage.readConfigFile().then(() => {
+        const Main = getMainComponent(cache);
+        ReactDOM.render(<Main />, document.querySelector('.body'));
+    });
 });
+ipcRenderer.send('get-stateCache');

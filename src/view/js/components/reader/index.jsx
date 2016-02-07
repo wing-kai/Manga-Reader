@@ -9,21 +9,19 @@ const { VIEW_MODE, READ_MODE } = require('./constants');
 const MangaManage = require('../../modules/manga_manage');
 const { Menu, MenuItem } = remote;
 
-let manga;
+let setTimeOutId = false;
 
 webFrame.setZoomLevelLimits(1, 1);
 
-const Reader = React.createClass({
-
+const getReaderComponent = manga => React.createClass({
     getInitialState() {
-
-        manga = MangaManage.getManga(ipcRenderer.sendSync('get-hashCache'));
-
         return {
             pageList: manga ? manga.getPageFile() : [],
             pageNum: manga.get('lastReaded'),
             viewMode: manga.get('viewMode'),
             readMode: READ_MODE.MORDEN,
+            isFullScreen: false,
+            showControlBar: false,
             canvasStyle: {
                 width: 0,
                 height: 0
@@ -58,7 +56,7 @@ const Reader = React.createClass({
 
         return (
             <div className="page-container" style={{background:"#000"}}>
-                <div className="control-bar">
+                <div className="control-bar" style={ thisState.isFullScreen ? { opacity: thisState.showControlBar ? 1 : 0 } : {} }>
                     <div>
                         <button className="icon ico-log-out" title="退出" onClick={this.handleQuitReader} />
                         <button className="icon ico-eye" title="阅读" onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch" />
@@ -112,19 +110,67 @@ const Reader = React.createClass({
             this.handleDrawCanvas();
         }
 
-        window.addEventListener('keydown', event => {
-            if (that.state.readMode === READ_MODE.MORDEN) {
-                if (event.keyIdentifier === "Up" || event.keyIdentifier === "Left")
-                    that.handleClickPreviousPage();
-                else
-                    that.handleClickNextPage();
-            } else {
-                if (event.keyIdentifier === "Down" || event.keyIdentifier === "Left")
-                    that.handleClickNextPage();
-                else
-                    that.handleClickPreviousPage();
+        window.addEventListener('keydown', this.handleKeyDown);
+        ipcRenderer.on('is-full-screen-reply', this.handleEnterFullScreenMode);
+    },
+
+    handleKeyDown(event) {
+        if (this.state.readMode === READ_MODE.MORDEN) {
+            if (event.keyIdentifier === "Up" || event.keyIdentifier === "Left")
+                this.handleClickPreviousPage();
+            if (event.keyIdentifier === "Down" || event.keyIdentifier === "Right")
+                this.handleClickNextPage();
+        } else {
+            if (event.keyIdentifier === "Down" || event.keyIdentifier === "Left")
+                this.handleClickNextPage();
+            if (event.keyIdentifier === "Up" || event.keyIdentifier === "Right")
+                this.handleClickPreviousPage();
+        }
+    },
+
+    handleMouseMove() {
+
+        const that = this;
+        const hideControlBar = () => {
+            if (that.state.isFullScreen) {
+                that.setState({ showControlBar: false });
+                TitleBarManage.ummountComponent();
             }
-        });
+        }
+
+        if (that.state.showControlBar) {
+            clearTimeout(setTimeOutId);
+            setTimeOutId = setTimeout(hideControlBar, 2000);
+        } else {
+            that.setState({
+                showControlBar: true
+            });
+            const TitleBar = TitleBarManage.getComponent();
+            TitleBarManage.renderComponent(
+                <TitleBar handleClose={this.handleQuitReader} />
+            );
+
+            setTimeOutId = setTimeout(hideControlBar, 2000);
+        }
+    },
+
+    handleEnterFullScreenMode(event, isFullScreen) {
+        if (isFullScreen) {
+            TitleBarManage.ummountComponent();
+            window.addEventListener('mousemove', this.handleMouseMove)
+        } else {
+            window.removeEventListener('mousemove', this.handleMouseMove);
+            const TitleBar = TitleBarManage.getComponent();
+            TitleBarManage.renderComponent(
+                <TitleBar handleClose={this.handleQuitReader} />
+            );
+        }
+
+        this.setState({ isFullScreen });
+    },
+
+    handleShowControlBar(showControlBar) {
+        this.setState({ showControlBar });
     },
 
     handleDrawCanvas() {
@@ -318,8 +364,12 @@ const Reader = React.createClass({
         MangaManage.saveConfig();
         this.setState(newState, this.handleDrawCanvas);
     }
-})
-
-MangaManage.readConfigFile().then(() => {
-    ReactDOM.render(<Reader />, document.querySelector('.body'));
 });
+
+ipcRenderer.once('get-hashCache-reply', (event, hash) => {
+    MangaManage.readConfigFile().then(() => {
+        const Reader = getReaderComponent(MangaManage.getManga(hash));
+        ReactDOM.render(<Reader />, document.querySelector('.body')); 
+    });
+});
+ipcRenderer.send('get-hashCache');

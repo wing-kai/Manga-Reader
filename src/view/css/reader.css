@@ -85,6 +85,7 @@ body:hover .control-bar {
     transition: opacity .3s;
 }
 
+.control-bar input[type=range]:active+.page-num,
 .control-bar input[type=range]:hover+.page-num {
     opacity: 1;
 }

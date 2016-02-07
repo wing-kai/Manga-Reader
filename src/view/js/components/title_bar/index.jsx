@@ -44,7 +44,7 @@ const renderTitleBar = TtitleBarComponent => {
     ReactDOM.render(TtitleBarComponent, wrap);
 }
 
-const ummountComponent = component => {
+const ummountComponent = () => {
     ReactDOM.unmountComponentAtNode(wrap);
     wrap.remove();
 }
