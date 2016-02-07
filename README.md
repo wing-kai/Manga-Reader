@@ -7,8 +7,7 @@
 
 # Run
 ```
-$ npm install -g electron
 $ npm install
-$ gulp
+$ npm run build
 $ npm start
 ```
