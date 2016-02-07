@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron ./asset/main.js",
-    "build": "gulp"
+    "build": "rm -rf ./asset; gulp"
   },
   "repository": {
     "type": "git",
