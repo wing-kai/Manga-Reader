@@ -20,6 +20,7 @@ const getReaderComponent = manga => React.createClass({
             pageNum: manga.get('lastReaded'),
             viewMode: manga.get('viewMode'),
             readMode: READ_MODE.MORDEN,
+            isCoverScreen: false,
             isFullScreen: false,
             showControlBar: false,
             canvasStyle: {
@@ -31,8 +32,19 @@ const getReaderComponent = manga => React.createClass({
 
     render() {
         const thisState = this.state;
+        const imgStyle = {};
         let wrapClass = "";
         let wrapContent;
+
+        if (thisState.viewMode === VIEW_MODE.SINGLE) {
+            if (thisState.isCoverScreen) {
+                imgStyle.objectFit = "cover";
+                imgStyle.maxHeight = "none";
+            } else {
+                imgStyle.objectFit = "contain";
+                imgStyle.maxHeight = "100%";
+            }
+        }
 
         if (
             thisState.viewMode === VIEW_MODE.SINGLE // 单页模式
@@ -40,8 +52,12 @@ const getReaderComponent = manga => React.createClass({
             || thisState.pageNum === thisState.pageList.length - 1 // 封底
         ) {
             wrapContent = (
-                <div className="wrap default" id='wrap'>
-                    <img src={thisState.pageList[thisState.pageNum]} alt={thisState.pageNum} />
+                <div className="wrap default" id='wrap' style={(thisState.viewMode === VIEW_MODE.SINGLE) && thisState.isCoverScreen ? {display:'block'} : {}}>
+                    <img
+                        src={thisState.pageList[thisState.pageNum]}
+                        alt={thisState.pageNum}
+                        style={imgStyle}
+                    />
                 </div>
             )
         } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
@@ -55,11 +71,17 @@ const getReaderComponent = manga => React.createClass({
         }
 
         return (
-            <div className="page-container" style={{background:"#000"}}>
+            <div className="page-container" style={{background:"#000"}} id="page-container">
                 <div className="control-bar" style={ thisState.isFullScreen ? { opacity: thisState.showControlBar ? 1 : 0 } : {} }>
                     <div>
                         <button className="icon ico-log-out" title="退出" onClick={this.handleQuitReader} />
                         <button className="icon ico-eye" title="阅读" onClick={this.handleClickViewModeSwitch} id="btnViewModeSwitch" />
+                        <button
+                            className={"icon ico-" + (thisState.isCoverScreen ? "resize-100" : "resize-full-screen")}
+                            title="充满屏幕"
+                            disabled={thisState.viewMode !== VIEW_MODE.SINGLE}
+                            onClick={this.handleSwitchCoverScreen}
+                        />
                         {
                             thisState.readMode === READ_MODE.TRADITION ? [
                                 <button className="icon ico-triangle-left" title="下一页" onClick={this.handleClickNextPage} key="next-page" />,
@@ -112,6 +134,12 @@ const getReaderComponent = manga => React.createClass({
 
         window.addEventListener('keydown', this.handleKeyDown);
         ipcRenderer.on('is-full-screen-reply', this.handleEnterFullScreenMode);
+    },
+
+    handleSwitchCoverScreen() {
+        this.setState({
+            isCoverScreen: !this.state.isCoverScreen
+        });
     },
 
     handleKeyDown(event) {
@@ -240,6 +268,9 @@ const getReaderComponent = manga => React.createClass({
         else
             newPageNum = +document.getElementById("page-range").value;
 
+        if (thisState.viewMode === VIEW_MODE.SINGLE && thisState.isCoverScreen)
+            document.getElementById("page-container").scrollTop = 0;
+
         manga.set({ lastReaded: newPageNum });
         MangaManage.saveConfig();
         this.setState({
@@ -326,6 +357,9 @@ const getReaderComponent = manga => React.createClass({
             pageNum: thisState.pageNum === 0 ? thisState.pageNum : thisState.pageNum - 1
         }
 
+        if (thisState.viewMode === VIEW_MODE.SINGLE && thisState.isCoverScreen)
+            document.getElementById("page-container").scrollTop = 0;
+
         manga.set({ lastReaded: newState.pageNum });
         MangaManage.saveConfig();
         this.setState(newState, this.handleDrawCanvas);
@@ -336,6 +370,9 @@ const getReaderComponent = manga => React.createClass({
         const newState = {
             pageNum: (thisState.pageNum === thisState.pageList.length - 1) ? thisState.pageNum : thisState.pageNum + 1
         }
+
+        if (thisState.viewMode === VIEW_MODE.SINGLE && thisState.isCoverScreen)
+            document.getElementById("page-container").scrollTop = 0;
 
         manga.set({ lastReaded: newState.pageNum });
         MangaManage.saveConfig();

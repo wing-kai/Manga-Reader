@@ -20,8 +20,8 @@
     .sidebar + ul > li { height: 40px; line-height: 40px; padding: 0 15px; color: #ccc; font-size: 14px; }
     .sidebar + ul > li:not(.add-list):hover { color: #fff; }
     .sidebar + ul > li.active { background: #444; color: #fff; }
-    .sidebar + ul > li.add-list { color: #888; display: none; }
-    .sidebar + ul:hover > li.add-list { display: block; }
+    .sidebar + ul > li.add-list { color: #888; opacity: 0; }
+    .sidebar + ul:hover > li.add-list { opacity: 1; }
     .sidebar + ul > li > input { border: none; background: #444; padding: 1px 0; margin: 0; height: 20px; line-height: 20px; font-size: 14px; width: 120px; color: #fff; }
     .main-content { flex: 1; background: #444; display: flex; }
     .container { overflow: scroll; flex: 1; }

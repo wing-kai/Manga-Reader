@@ -12,7 +12,7 @@ const READ_MODE = {
 const CONFIG_PATH = "manga.json";
 
 const REGEXP = {
-    IMAGE_FILE: /^.+(\.png|\.jpg|\.gif|\.bmp)$/,
+    IMAGE_FILE: /^.+(\.png|\.jpg|\.bmp)$/,
     MANGA_TITLE: /^.+\/(.+)$/
 }
 
