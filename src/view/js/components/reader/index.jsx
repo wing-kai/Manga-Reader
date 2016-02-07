@@ -83,9 +83,9 @@ const getReaderComponent = manga => React.createClass({
                         <input
                             id="page-range"
                             type="range"
-                            min={thisState.pageList.length % 2 === 0 && (thisState.readMode === READ_MODE.TRADITION) ? 1 : 0}
+                            min='0'
                             max={thisState.pageList.length - 1}
-                            step={thisState.viewMode === VIEW_MODE.SINGLE ? 1 : 2}
+                            step='1'
                             value={thisState.readMode === READ_MODE.MORDEN ? thisState.pageNum : thisState.pageList.length - thisState.pageNum - 1}
                             onChange={this.handleDragPageRange}
                         />
@@ -186,8 +186,14 @@ const getReaderComponent = manga => React.createClass({
         )
             return;
 
-        imgA.src = thisState.pageList[thisState.pageNum];
-        imgB.src = thisState.pageList[thisState.pageNum+1];
+        if (thisState.pageNum % 2 === 1) {
+            imgA.src = thisState.pageList[thisState.pageNum];
+            imgB.src = thisState.pageList[thisState.pageNum + 1];
+        } else {
+            imgA.src = thisState.pageList[thisState.pageNum - 1];
+            imgB.src = thisState.pageList[thisState.pageNum];
+        }
+
 
         Promise.all([
             new Promise(resolve => { imgA.onload = resolve }),
@@ -295,27 +301,19 @@ const getReaderComponent = manga => React.createClass({
             type: 'checkbox',
             checked: thisState.viewMode === VIEW_MODE.DOUBLE,
             click: () => {
-                const newState = {
+                manga.set({
+                    viewMode: VIEW_MODE.DOUBLE,
+                    lastReaded: thisState.pageNum
+                });
+                MangaManage.saveConfig();
+                that.setState({
                     viewMode: VIEW_MODE.DOUBLE,
                     pageNum: thisState.pageNum,
                     canvasStyle: {
                         width: 0,
                         height: 0
                     }
-                }
-                if (
-                    newState.pageNum > 0
-                    && newState.pageNum < thisState.pageList.length
-                    && newState.pageNum % 2 === 0
-                ) {
-                    --newState.pageNum;
-                }
-                manga.set({
-                    viewMode: VIEW_MODE.DOUBLE,
-                    lastReaded: newState.pageNum
-                });
-                MangaManage.saveConfig();
-                that.setState(newState, this.handleDrawCanvas);
+                }, this.handleDrawCanvas);
             }
         }));
 
@@ -324,18 +322,8 @@ const getReaderComponent = manga => React.createClass({
 
     handleClickPreviousPage() {
         const thisState = this.state;
-        let newState = {
-            pageNum: thisState.pageNum
-        }
-
-        if (newState.pageNum !== 0) {
-            if (thisState.viewMode === VIEW_MODE.SINGLE) {
-                newState.pageNum--;
-            } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
-                newState.pageNum = newState.pageNum === 1 ? 0 : newState.pageNum - 2;
-            } else {
-                // waterfall...
-            }
+        const newState = {
+            pageNum: thisState.pageNum === 0 ? thisState.pageNum : thisState.pageNum - 1
         }
 
         manga.set({ lastReaded: newState.pageNum });
@@ -345,19 +333,8 @@ const getReaderComponent = manga => React.createClass({
 
     handleClickNextPage() {
         const thisState = this.state;
-        let newState = {
-            pageNum: thisState.pageNum
-        }
-
-        if (thisState.pageNum < thisState.pageList.length - 1) {
-            if (thisState.viewMode === VIEW_MODE.SINGLE) {
-                newState.pageNum++;
-            } else if (thisState.viewMode === VIEW_MODE.DOUBLE) {
-                if (thisState.pageNum < thisState.pageList.length - 2)
-                    newState.pageNum = newState.pageNum === 0 ? 1 : newState.pageNum + 2;
-            } else {
-                // waterfall...
-            }
+        const newState = {
+            pageNum: (thisState.pageNum === thisState.pageList.length - 1) ? thisState.pageNum : thisState.pageNum + 1
         }
 
         manga.set({ lastReaded: newState.pageNum });
