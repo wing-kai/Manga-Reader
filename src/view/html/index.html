@@ -12,7 +12,7 @@
     .header { background: #000; flex-basis: 22px; }
     .container { display: flex; flex: 1; }
     .sidebar { flex-basis: 50px; background: #222; color: #fff; display: flex; align-items: center; flex-direction: column; padding: 5px 0 10px; }
-    .sidebar button { font-size: 20px; flex-basis: 30px; width: 30px; padding: 0; margin: 15px 0 0; border: none; background: none; color: #bbb; cursor: pointer; transition: color 300ms; }
+    .sidebar button { font-size: 20px; flex-basis: 30px; width: 30px; padding: 0; margin: 15px 0 0; border: none; background: none; color: #bbb; transition: color 300ms; }
     .sidebar button:disabled { cursor: not-allowed; }
     .sidebar button.active:not(:disabled), .sidebar button:not(:disabled):hover { color: #fff; }
     .sidebar button:not(:disabled):active { color: #666; }
@@ -29,7 +29,7 @@
     .empty-tips { text-align: center; color: #fff; border: dashed 2px #fff; border-radius: 5px; padding: 20px; margin-top: 50px; text-decoration: none; }
     .manga-wrap { height: 240px; width: 160px; margin: 10px; position: relative; display: flex; }
     .manga-wrap a { flex: 1; display: flex; align-items: center; justify-content: center; }
-    .manga-wrap img { max-width: 100%; max-height: 100%; cursor: pointer; }
+    .manga-wrap img { max-width: 100%; max-height: 100% }
     .manga-wrap.empty { visibility: hidden; }
     button.hover-delete { position: absolute; height: 16px; width: 16px; background-color: red; color: #fff; border: none; border-radius: 15px; right: 0; top: 0; transform: translate(8px, -8px); display: none; cursor: pointer; }
     *:hover > button.hover-delete, * > button.hover-delete:hover { display: block; }

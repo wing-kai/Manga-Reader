@@ -36,6 +36,8 @@ module.exports = React.createClass({
                                 onClick={this.handleClickList.bind(that, li.id)}
                                 onDoubleClick={this.handleDoubleClickList.bind(that, li.id)}
                                 onContextMenu={this.handleContextMenu.bind(that, li.id)}
+                                onDragOver={this.handleDragOver}
+                                onDrop={this.handleDrop.bind(that, li.id)}
                             >
                                 {
                                     thisState.edit && (thisState.edit === li.id)
@@ -75,6 +77,14 @@ module.exports = React.createClass({
                 }
             </ul>
         )
+    },
+
+    handleDragOver(event) {
+        event.preventDefault();
+    },
+
+    handleDrop(categoryId, event) {
+        this.props.handleDrop(event, categoryId);
     },
 
     handleClickList(id) {

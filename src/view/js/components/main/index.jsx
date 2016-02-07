@@ -32,7 +32,8 @@ const BookCase = React.createClass({
         return {
             list: [],
             category: "",
-            author: ""
+            author: "",
+            draggable: false
         }
     },
 
@@ -48,9 +49,12 @@ const BookCase = React.createClass({
                 onContextMenu={this.handleRightClick.bind(that, manga)}
             >
                 <img
+                    onDragStart={this.handleDragStart}
+                    draggable={thisProps.draggable}
                     src={manga.get("path") + '/' + manga.get("cover")}
                     alt={manga.get("title")}
                     onClick={this.handleClickMangaWrap.bind(that, manga.get("hash"))}
+                    data-hash={manga.get("hash")}
                 />
             </div>
         ));
@@ -75,6 +79,13 @@ const BookCase = React.createClass({
                 }
             </div>
         )
+    },
+
+    handleDragStart(event) {
+        if (!this.props.draggable)
+            return event.preventDefault();
+
+        event.dataTransfer.setData("hash", event.target.dataset.hash);
     },
 
     handleClickMangaWrap(hash) {
@@ -151,9 +162,9 @@ const getMainComponent = stateCache => React.createClass({
             || (thisState.sideBar === SIDE_BAR.CATEGORIES && thisState.selectedCategory === 0)
             || (thisState.sideBar === SIDE_BAR.AUTHOR && thisState.selectedAuthor === 0)
         ) {
-            BookCaseContent = <BookCase readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} list={MangaManage.getMangaListCopy()} handleExport={this.handleClickExportBtn} />
+            BookCaseContent = <BookCase draggable={thisState.sideBar === SIDE_BAR.CATEGORIES} readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} list={MangaManage.getMangaListCopy()} handleExport={this.handleClickExportBtn} />
         } else if (thisState.sideBar === SIDE_BAR.CATEGORIES) {
-            BookCaseContent = <BookCase readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} category={thisState.selectedCategory} list={MangaManage.getCategory(thisState.selectedCategory)} />
+            BookCaseContent = <BookCase draggable={true} readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} category={thisState.selectedCategory} list={MangaManage.getCategory(thisState.selectedCategory)} />
         } else { // thisState.sideBar === SIDE_BAR.AUTHOR
 
         }
@@ -204,6 +215,7 @@ const getMainComponent = stateCache => React.createClass({
                                 handleAddList={this.handleAddList}
                                 handleEditList={this.handleEditList}
                                 handleDeleteList={this.handleDeleteList}
+                                handleDrop={this.handleDrop}
                             />
                         )
                     }
@@ -223,6 +235,12 @@ const getMainComponent = stateCache => React.createClass({
     
     componentWillUnmount() {
         Store.listenOff(this.storeListener);
+    },
+
+    handleDrop(event, categoryId) {
+        const manga = MangaManage.getManga(event.dataTransfer.getData("hash"));
+        manga.setCategory(categoryId);
+        event.preventDefault();
     },
 
     handleSelectedManga(hash) {
