@@ -15,7 +15,8 @@ module.exports = React.createClass({
 
     getInitialState: () => ({
         edit: false,
-        add: false
+        add: false,
+        dragOver: ""
     }),
 
     render() {
@@ -37,7 +38,9 @@ module.exports = React.createClass({
                                 onDoubleClick={this.handleDoubleClickList.bind(that, li.id)}
                                 onContextMenu={this.handleContextMenu.bind(that, li.id)}
                                 onDragOver={this.handleDragOver}
+                                onDragLeave={this.handleDragLeave}
                                 onDrop={this.handleDrop.bind(that, li.id)}
+                                data-list-id={li.id}
                             >
                                 {
                                     thisState.edit && (thisState.edit === li.id)
@@ -50,7 +53,9 @@ module.exports = React.createClass({
                                             maxLength="8"
                                             defaultValue={li.name}
                                         />
-                                    ) : li.name
+                                    ) : (
+                                        <span style={thisState.dragOver === li.id ? {color: '#4BB1FF'} : {}}>{li.name}</span>
+                                    )
                                 }
                             </li>
                         )
@@ -80,11 +85,28 @@ module.exports = React.createClass({
     },
 
     handleDragOver(event) {
+
+        if (event.target.dataset.listId !== this.state.dragOver) {
+            this.setState({
+                dragOver: event.target.dataset.listId
+            });
+        }
+
+        event.preventDefault();
+    },
+
+    handleDragLeave(event) {
+        this.setState({
+            dragOver: ""
+        });
         event.preventDefault();
     },
 
     handleDrop(categoryId, event) {
         this.props.handleDrop(event, categoryId);
+        this.setState({
+            dragOver: ""
+        });
     },
 
     handleClickList(id) {

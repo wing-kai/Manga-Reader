@@ -7,6 +7,7 @@ const { Menu, MenuItem } = remote;
 const getAction = require('./action');
 const getStore = require('./store');
 
+const RectangleSelection = require('../rectangle_selection');
 const SideMenu = require('../side_menu');
 const MangaManage = require('../../modules/manga_manage');
 
@@ -33,7 +34,8 @@ const BookCase = React.createClass({
             list: [],
             category: "",
             author: "",
-            draggable: false
+            draggable: false,
+            rectangleSelected: new Set()
         }
     },
 
@@ -43,10 +45,11 @@ const BookCase = React.createClass({
         const thisProps = this.props;
         const list = thisProps.list.map( manga => (
             <div
-                className="manga-wrap"
+                className={"manga-wrap" + (thisProps.rectangleSelected.has(manga.get('hash')) ? " selected" : "")}
                 key={manga.get("hash")}
                 title={manga.get("title")}
                 onContextMenu={this.handleRightClick.bind(that, manga)}
+                data-hash={manga.get("hash")}
             >
                 <img
                     onDragStart={this.handleDragStart}
@@ -85,7 +88,10 @@ const BookCase = React.createClass({
         if (!this.props.draggable)
             return event.preventDefault();
 
-        event.dataTransfer.setData("hash", event.target.dataset.hash);
+        if (this.props.rectangleSelected.size)
+            event.dataTransfer.setData("hash", Array.from(this.props.rectangleSelected));
+        else
+            event.dataTransfer.setData("hash", [event.target.dataset.hash]);
     },
 
     handleClickMangaWrap(hash) {
@@ -144,12 +150,18 @@ const BookCase = React.createClass({
 const getMainComponent = stateCache => React.createClass({
 
     getInitialState() {
+
+        if (stateCache) {
+            stateCache.rectangleSelected = new Set();
+        }
+
         return stateCache ? stateCache : {
             sideBar: SIDE_BAR.ALL,
             categories: MangaManage.getCategory(),
             authors: [],
             selectedCategory: 0,
-            selectedAuthor: 0
+            selectedAuthor: 0,
+            rectangleSelected: new Set()
         }
     },
 
@@ -162,9 +174,27 @@ const getMainComponent = stateCache => React.createClass({
             || (thisState.sideBar === SIDE_BAR.CATEGORIES && thisState.selectedCategory === 0)
             || (thisState.sideBar === SIDE_BAR.AUTHOR && thisState.selectedAuthor === 0)
         ) {
-            BookCaseContent = <BookCase draggable={thisState.sideBar === SIDE_BAR.CATEGORIES} readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} list={MangaManage.getMangaListCopy()} handleExport={this.handleClickExportBtn} />
+            BookCaseContent = (
+                <BookCase
+                    rectangleSelected={thisState.rectangleSelected}
+                    readManga={this.handleSelectedManga}
+                    parentForceUpdate={this.handleForceUpdate}
+                    draggable={thisState.sideBar === SIDE_BAR.CATEGORIES}
+                    list={MangaManage.getMangaListCopy()}
+                    handleExport={this.handleClickExportBtn}
+                />
+            )
         } else if (thisState.sideBar === SIDE_BAR.CATEGORIES) {
-            BookCaseContent = <BookCase draggable={true} readManga={this.handleSelectedManga} parentForceUpdate={this.handleForceUpdate} category={thisState.selectedCategory} list={MangaManage.getCategory(thisState.selectedCategory)} />
+            BookCaseContent = (
+                <BookCase
+                    rectangleSelected={thisState.rectangleSelected}
+                    readManga={this.handleSelectedManga}
+                    parentForceUpdate={this.handleForceUpdate}
+                    draggable={true}
+                    list={MangaManage.getCategory(thisState.selectedCategory)}
+                    category={thisState.selectedCategory}
+                />
+            )
         } else { // thisState.sideBar === SIDE_BAR.AUTHOR
 
         }
@@ -231,6 +261,29 @@ const getMainComponent = stateCache => React.createClass({
         this.storeListener = Store.listen({
             getMangaInfo: this.handleAddedManga
         });
+        if (this.state.sideBar === SIDE_BAR.CATEGORIES) {
+            RectangleSelection.addSelectbleElements(
+                Array.from(
+                    document.getElementsByClassName('manga-wrap')
+                ),
+                'hash'
+            );
+            RectangleSelection.setSelectedElementsHandler(this.handlerMarqueenSelected);
+            RectangleSelection.setDeselecteAllElementsHandler(this.handleDeselectAll);
+            RectangleSelection.startListen();
+        }
+    },
+
+    handlerMarqueenSelected(hashList) {
+        this.setState({
+            rectangleSelected: new Set(hashList)
+        });
+    },
+
+    handleDeselectAll() {
+        this.setState({
+            rectangleSelected: new Set()
+        });
     },
     
     componentWillUnmount() {
@@ -238,8 +291,14 @@ const getMainComponent = stateCache => React.createClass({
     },
 
     handleDrop(event, categoryId) {
-        const manga = MangaManage.getManga(event.dataTransfer.getData("hash"));
-        manga.setCategory(categoryId);
+
+        // dataTransfer只支持字符串格式，数组会变成csv文本
+        event.dataTransfer.getData("hash").split(',').map(
+            hash => MangaManage.getManga(hash)
+        ).forEach(
+            manga => manga.setCategory(categoryId)
+        );
+
         event.preventDefault();
     },
 
@@ -249,33 +308,44 @@ const getMainComponent = stateCache => React.createClass({
 
     handleClickSidebarBtn(btnName) {
 
+        const that = this;
         const thisState = this.state;
 
-        if (thisState.sideBar === SIDE_BAR.ALL) {
+        if (btnName === thisState.sideBar) {
+            return;
+        }
+
+        RectangleSelection.endListen();
+
+        if (btnName === SIDE_BAR.ALL) {
             this.setState({
                 sideBar: SIDE_BAR.ALL
             });
-        } else if (thisState.sideBar === SIDE_BAR.AUTHOR) {
+        } else if (btnName === SIDE_BAR.AUTHOR) {
             this.setState({
 
             });
-        }  else if (thisState.sideBar === SIDE_BAR.CATEGORIES) {
+        }  else if (btnName === SIDE_BAR.CATEGORIES) {
             this.setState({
                 sideBar: SIDE_BAR.CATEGORIES
+            }, () => {
+                RectangleSelection.addSelectbleElements(
+                    Array.from(
+                        document.getElementsByClassName('manga-wrap')
+                    ),
+                    'hash'
+                );
+                RectangleSelection.setSelectedElementsHandler(that.handlerMarqueenSelected);
+                RectangleSelection.setDeselecteAllElementsHandler(that.handleDeselectAll);
+                RectangleSelection.startListen();
             });
         }  else if (thisState.sideBar === SIDE_BAR.EXPORT) {
             this.setState({
 
             });
-        }  else { // SIDE_BAR.CONFIG
+        } else { // SIDE_BAR.CONFIG
             this.setState({
 
-            });
-        } 
-
-        if (this.state.sideBar !== btnName) {
-            this.setState({
-                sideBar: btnName
             });
         }
     },

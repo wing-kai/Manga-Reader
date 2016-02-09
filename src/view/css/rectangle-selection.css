@@ -1,0 +1,10 @@
+.select-box {
+    border: solid 1px #aaa;
+    background: rgba(187, 187, 187, 0.3);;
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+}
