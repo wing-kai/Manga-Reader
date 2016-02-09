@@ -29,7 +29,7 @@
     .book-list { display: flex; flex-wrap: wrap; justify-content: space-around; overflow: scroll; padding: 10px; }
     .empty-tips { text-align: center; color: #fff; border: dashed 2px #fff; border-radius: 5px; padding: 20px; margin-top: 50px; text-decoration: none; }
     .manga-wrap { height: 240px; width: 160px; margin: 10px; position: relative; display: flex; }
-    .manga-wrap img { max-width: 100%; max-height: 100% }
+    .manga-wrap img { max-width: 100%; object-fit: contain; align-self: flex-end; }
     .manga-wrap.selected img { box-shadow: 0 0 0 2px #00BCFF; }
     .manga-wrap.empty { visibility: hidden; }
     button.hover-delete { position: absolute; height: 16px; width: 16px; background-color: red; color: #fff; border: none; border-radius: 15px; right: 0; top: 0; transform: translate(8px, -8px); display: none; cursor: pointer; }
