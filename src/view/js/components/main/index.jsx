@@ -71,7 +71,16 @@ const BookCase = React.createClass({
                             <div style={{ flex:1 }} />
                         </div>
                     ) : thisProps.category ? null : (
-                        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'center',flexDirection:'column',color:'#eee'}}>
+                        <div
+                            style={{
+                                flex:1,
+                                display:'flex',
+                                justifyContent:'center',
+                                alignItems:'center',
+                                flexDirection:'column',
+                                color:'#eee'
+                            }}
+                        >
                             <div className="icon ico-emoji-neutral" style={{fontSize:30}} />
                             <br/>
                             <div>资料库什么都没有，添加一些漫画吧</div>
@@ -117,6 +126,14 @@ const BookCase = React.createClass({
                     category => ({
                         label: category.name,
                         click() {
+                            if (thisProps.rectangleSelected.size) {
+                                return Array.from(thisProps.rectangleSelected).map(
+                                    hash => MangaManage.getManga(hash)
+                                ).forEach(
+                                    mangaObj => mangaObj.setCategory(category.id)
+                                );
+                            }
+
                             manga.setCategory(category.id);
                         }
                     })
@@ -127,6 +144,14 @@ const BookCase = React.createClass({
             menu.append(new MenuItem({
                 label: '从分类中移除',
                 click() {
+                    if (thisProps.rectangleSelected.size) {
+                        return Array.from(thisProps.rectangleSelected).map(
+                            hash => MangaManage.getManga(hash)
+                        ).forEach(
+                            mangaObj => mangaObj.removeFromCategory(thisProps.category)
+                        );
+                    }
+
                     manga.removeFromCategory(thisProps.category);
                     thisProps.parentForceUpdate();
                 }
@@ -138,7 +163,14 @@ const BookCase = React.createClass({
         menu.append(new MenuItem({
             label: '删除',
             click() {
-                manga.remove();
+                if (thisProps.rectangleSelected.size) {
+                    Array.from(thisProps.rectangleSelected).map(
+                        hash => MangaManage.getManga(hash)
+                    ).forEach( mangaObj => mangaObj.remove() );
+                } else {
+                    manga.remove();
+                }
+
                 MangaManage.saveConfig().then(thisProps.parentForceUpdate);
             }
         }));
@@ -241,7 +273,11 @@ const getMainComponent = stateCache => React.createClass({
                             <SideMenu
                                 list={thisState.categories}
                                 handleClickList={this.handleClickList}
-                                active={thisState.sideBar === SIDE_BAR.CATEGORIES ? thisState.selectedCategory : thisState.selectedAuthor}
+                                active={
+                                    thisState.sideBar === SIDE_BAR.CATEGORIES
+                                    ? thisState.selectedCategory
+                                    : thisState.selectedAuthor
+                                }
                                 handleAddList={this.handleAddList}
                                 handleEditList={this.handleEditList}
                                 handleDeleteList={this.handleDeleteList}
@@ -281,6 +317,9 @@ const getMainComponent = stateCache => React.createClass({
     },
 
     handleDeselectAll() {
+        if (this.state.rectangleSelected.size === 0)
+            return;
+
         this.setState({
             rectangleSelected: new Set()
         });
