@@ -147,7 +147,7 @@ const handleMouseUp = event => {
     selectBoxDOM.removeAttribute('style');
 }
 
-const addSelectbleElements = (elements, flag) => {
+const setSelectbleElements = (elements, flag) => {
     Store = Store.set('listeningElements', Immutable.List(
         elements.map(element => {
             const eBCR = element.getBoundingClientRect()
@@ -199,7 +199,7 @@ const endListen = () => {
 }
 
 module.exports = {
-    addSelectbleElements,
+    setSelectbleElements,
     startListen,
     endListen,
     setSelectedElementsHandler: func => {

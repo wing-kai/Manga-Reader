@@ -145,14 +145,15 @@ const BookCase = React.createClass({
                 label: '从分类中移除',
                 click() {
                     if (thisProps.rectangleSelected.size) {
-                        return Array.from(thisProps.rectangleSelected).map(
+                        Array.from(thisProps.rectangleSelected).map(
                             hash => MangaManage.getManga(hash)
                         ).forEach(
                             mangaObj => mangaObj.removeFromCategory(thisProps.category)
                         );
+                    } else {
+                        manga.removeFromCategory(thisProps.category);
                     }
 
-                    manga.removeFromCategory(thisProps.category);
                     thisProps.parentForceUpdate();
                 }
             }));
@@ -297,17 +298,15 @@ const getMainComponent = stateCache => React.createClass({
         this.storeListener = Store.listen({
             getMangaInfo: this.handleAddedManga
         });
-        if (this.state.sideBar === SIDE_BAR.CATEGORIES) {
-            RectangleSelection.addSelectbleElements(
-                Array.from(
-                    document.getElementsByClassName('manga-wrap')
-                ),
-                'hash'
-            );
-            RectangleSelection.setSelectedElementsHandler(this.handlerMarqueenSelected);
-            RectangleSelection.setDeselecteAllElementsHandler(this.handleDeselectAll);
-            RectangleSelection.startListen();
-        }
+        RectangleSelection.setSelectbleElements(
+            Array.from(
+                document.getElementsByClassName('manga-wrap')
+            ),
+            'hash'
+        );
+        RectangleSelection.setSelectedElementsHandler(this.handlerMarqueenSelected);
+        RectangleSelection.setDeselecteAllElementsHandler(this.handleDeselectAll);
+        RectangleSelection.startListen();
     },
 
     handlerMarqueenSelected(hashList) {
@@ -354,11 +353,16 @@ const getMainComponent = stateCache => React.createClass({
             return;
         }
 
-        RectangleSelection.endListen();
-
         if (btnName === SIDE_BAR.ALL) {
             this.setState({
                 sideBar: SIDE_BAR.ALL
+            }, () => {
+                RectangleSelection.setSelectbleElements(
+                    Array.from(
+                        document.getElementsByClassName('manga-wrap')
+                    ),
+                    'hash'
+                );
             });
         } else if (btnName === SIDE_BAR.AUTHOR) {
             this.setState({
@@ -368,15 +372,12 @@ const getMainComponent = stateCache => React.createClass({
             this.setState({
                 sideBar: SIDE_BAR.CATEGORIES
             }, () => {
-                RectangleSelection.addSelectbleElements(
+                RectangleSelection.setSelectbleElements(
                     Array.from(
                         document.getElementsByClassName('manga-wrap')
                     ),
                     'hash'
                 );
-                RectangleSelection.setSelectedElementsHandler(that.handlerMarqueenSelected);
-                RectangleSelection.setDeselecteAllElementsHandler(that.handleDeselectAll);
-                RectangleSelection.startListen();
             });
         }  else if (thisState.sideBar === SIDE_BAR.EXPORT) {
             this.setState({
@@ -437,13 +438,22 @@ const getMainComponent = stateCache => React.createClass({
 
     handleAddedManga(promise) {
         const that = this;
-        promise.then(newManga => {
-            that.setState({
-                sideBar: SIDE_BAR.ALL,
-                selectedCategory: 0,
-                selectedAuthor: 0,
-                authors: []
+        promise.then(newManga =>
+            new Promise(resolve => {
+                that.setState({
+                    sideBar: SIDE_BAR.ALL,
+                    selectedCategory: 0,
+                    selectedAuthor: 0,
+                    authors: []
+                }, resolve);
             })
+        ).then(() => {
+            RectangleSelection.setSelectbleElements(
+                Array.from(
+                    document.getElementsByClassName('manga-wrap')
+                ),
+                'hash'
+            );
         })
     }
 });
