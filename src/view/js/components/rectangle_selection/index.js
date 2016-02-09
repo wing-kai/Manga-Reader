@@ -23,10 +23,8 @@ const handleMouseDown = event => {
     }
 
     Store = Store.set('firstDownPosition', firstDownPosition);
-    if (Store.get('keyboardPressing') === "") {
+    if (Store.get('keyboardPressing') === "")
         Store = Store.set('selectedElements', new Set());
-        deselectedAllElementsHandler();
-    }
 
     Store.get('listeningElements').toJS().forEach(element => {
         if (
@@ -38,8 +36,10 @@ const handleMouseDown = event => {
             downInElements = true;
     });
 
-    if (!downInElements)
+    if (!downInElements) {
+        deselectedAllElementsHandler();
         document.body.addEventListener('mousemove', handleMouseMove);
+    }
 }
 
 const handleMouseMove = event => {
@@ -150,17 +150,17 @@ const handleMouseUp = event => {
 const addSelectbleElements = (elements, flag) => {
     Store = Store.set('listeningElements', Immutable.List(
         elements.map(element => {
-            const elementBoundingClientRect = element.getBoundingClientRect()
+            const eBCR = element.getBoundingClientRect()
             return {
                 id: element.dataset[flag],
-                topLeftX: +elementBoundingClientRect.left.toFixed(0),
-                topLeftY: +elementBoundingClientRect.top.toFixed(0),
-                topRightX: +elementBoundingClientRect.left.toFixed(0) + +elementBoundingClientRect.width.toFixed(0),
-                topRightY: +elementBoundingClientRect.top.toFixed(0),
-                bottomLeftX: +elementBoundingClientRect.left.toFixed(0),
-                bottomLeftY: +elementBoundingClientRect.top.toFixed(0) + (+elementBoundingClientRect.height.toFixed(0)),
-                bottomRightX: +elementBoundingClientRect.left.toFixed(0) + (+elementBoundingClientRect.width.toFixed(0)),
-                bottomRightY: +elementBoundingClientRect.top.toFixed(0) + (+elementBoundingClientRect.height.toFixed(0))
+                topLeftX: +eBCR.left.toFixed(0),
+                topLeftY: +eBCR.top.toFixed(0),
+                topRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
+                topRightY: +eBCR.top.toFixed(0),
+                bottomLeftX: +eBCR.left.toFixed(0),
+                bottomLeftY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0),
+                bottomRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
+                bottomRightY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0)
             }
         })
     ));
