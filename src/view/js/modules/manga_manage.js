@@ -6,6 +6,7 @@ const { CONFIG_PATH, REGEXP, VIEW_MODE } = require('../components/common/constan
 
 let MangaList = Immutable.List([]);
 let Categories = Immutable.List([]);
+let timeoutId = false;
 
 class Manga {
 
@@ -122,23 +123,35 @@ const addManga = (newMangaList = []) => {
         MangaList = MangaList.push(new Manga(clone(data))); 
     });
 
-    return saveConfig().then(() => MangaList.toJS());
+    return saveConfig(true);
 }
 
 // 写入配置文件
-const saveConfig = () => {
+const saveConfig = (isImmediately = false) => new Promise(
+    (resolve, reject) => {
+        const save = () => {
+            const configContent = JSON.stringify({
+                manga: MangaList.map( mangaData => mangaData.getOriginData() ).filter( mangaData => mangaData !== null ).toJS(),
+                categories: Categories.toJS()
+            });
+            fs.writeFile(CONFIG_PATH, configContent, 'utf-8', err => {
+                err ? reject(err) : resolve(MangaList.toJS())
+            });
+        }
 
-    const configContent = JSON.stringify({
-        manga: MangaList.map( mangaData => mangaData.getOriginData() ).filter( mangaData => mangaData !== null ).toJS(),
-        categories: Categories.toJS()
-    });
+        if (isImmediately)
+            save();
+        else {
+            if (!isNaN(timeoutId))
+                clearTimeout(timeoutId);
 
-    return new Promise((resolve, reject) => {
-        fs.writeFile(CONFIG_PATH, configContent, 'utf-8', err => {
-            err ? reject(err) : resolve(MangaList.toJS())
-        });
-    })
-}
+            timeoutId = setTimeout(() => {
+                timeoutId = false;
+                save();
+            }, 1000);
+        }
+    }
+);
 
 const deleteManga = () => {
 }

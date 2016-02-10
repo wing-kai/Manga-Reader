@@ -63,7 +63,7 @@ const BookCase = React.createClass({
         ));
 
         return (
-            <div className="container">
+            <div className="container" onDrop={this.handleDrop} onDragOver={this.handleDragOver}>
                 {
                     list.length ? (
                         <div className="book-list">
@@ -93,6 +93,10 @@ const BookCase = React.createClass({
         )
     },
 
+    handleDragOver(event) {
+        event.preventDefault();
+    },
+
     handleDragStart(event) {
         if (!this.props.draggable)
             return event.preventDefault();
@@ -105,6 +109,19 @@ const BookCase = React.createClass({
 
     handleClickMangaWrap(hash) {
         this.props.readManga(hash);
+    },
+
+    handleDrop(event) {
+        Action.getMangaInfo(
+            Array.from(
+                event.dataTransfer.files
+            ).filter(
+                file => file.type ? false : true
+            ).map(
+                file => file.path
+            )
+        );
+        event.preventDefault();
     },
 
     handleRightClick(manga) {
@@ -172,7 +189,7 @@ const BookCase = React.createClass({
                     manga.remove();
                 }
 
-                MangaManage.saveConfig().then(thisProps.parentForceUpdate);
+                MangaManage.saveConfig(true).then(thisProps.parentForceUpdate);
             }
         }));
 
