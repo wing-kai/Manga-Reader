@@ -7,26 +7,48 @@ let Store = Immutable.Map({
         y: 0
     },
     keyboardPressing: "",
-    selectedElements: new Set()
+    selectedElements: new Set(),
+    flag: ""
 });
 let selectedElementsHandler = () => {};
 let deselectedAllElementsHandler = () => {};
+let listeningElements = [];
 
 const selectBoxDOM = document.createElement('div');
 selectBoxDOM.className = 'select-box';
 
 const handleMouseDown = event => {
+
     let downInElements = false;
+    const flag = Store.get('flag');
     const firstDownPosition = {
         x: event.clientX,
         y: event.clientY
     }
 
     Store = Store.set('firstDownPosition', firstDownPosition);
+
     if (Store.get('keyboardPressing') === "")
         Store = Store.set('selectedElements', new Set());
 
-    Store.get('listeningElements').toJS().forEach(element => {
+    listeningElements = Store.get('listeningElements').map(
+        element => {
+            const eBCR = element.getBoundingClientRect()
+            return {
+                id: element.dataset[flag],
+                topLeftX: +eBCR.left.toFixed(0),
+                topLeftY: +eBCR.top.toFixed(0),
+                topRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
+                topRightY: +eBCR.top.toFixed(0),
+                bottomLeftX: +eBCR.left.toFixed(0),
+                bottomLeftY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0),
+                bottomRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
+                bottomRightY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0)
+            }
+        }
+    )
+
+    listeningElements.forEach(element => {
         if (
             firstDownPosition.x > element.topLeftX
             && firstDownPosition.x < element.bottomRightX
@@ -70,7 +92,7 @@ const handleMouseMove = event => {
         bottomRightY: +selectBox.top.toFixed(0) + (+selectBox.height.toFixed(0))
     }
 
-    Store.get('listeningElements').toJS().forEach(element => {
+    listeningElements.forEach(element => {
         if ((
             element.topLeftX > selectBox.topLeftX
             && element.topLeftY > selectBox.topLeftY
@@ -145,25 +167,12 @@ const handleMouseUp = event => {
     });
 
     selectBoxDOM.removeAttribute('style');
+    listeningElements = [];
 }
 
 const setSelectbleElements = (elements, flag) => {
-    Store = Store.set('listeningElements', Immutable.List(
-        elements.map(element => {
-            const eBCR = element.getBoundingClientRect()
-            return {
-                id: element.dataset[flag],
-                topLeftX: +eBCR.left.toFixed(0),
-                topLeftY: +eBCR.top.toFixed(0),
-                topRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
-                topRightY: +eBCR.top.toFixed(0),
-                bottomLeftX: +eBCR.left.toFixed(0),
-                bottomLeftY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0),
-                bottomRightX: +eBCR.left.toFixed(0) + +eBCR.width.toFixed(0),
-                bottomRightY: +eBCR.top.toFixed(0) + +eBCR.height.toFixed(0)
-            }
-        })
-    ));
+    Store = Store.set('listeningElements', elements);
+    Store = Store.set('flag', flag);
 }
 
 const handleKeyDown = event => {

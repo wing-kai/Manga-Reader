@@ -5,13 +5,20 @@ const { remote, ipcRenderer, webFrame } = require('electron');
 const TitleBarManage = require("../title_bar");
 
 const { VIEW_MODE, READ_MODE } = require('./constants');
+const setApplicationMenu = require('./application_menu');
 
 const MangaManage = require('../../modules/manga_manage');
 const { Menu, MenuItem } = remote;
 
+
 let setTimeOutId = false;
 
+require('../common/global');
 webFrame.setZoomLevelLimits(1, 1);
+document.addEventListener('dragstart', event => {
+    event.preventDefault();
+    return false;
+});
 
 const getReaderComponent = manga => React.createClass({
     getInitialState() {
@@ -134,6 +141,11 @@ const getReaderComponent = manga => React.createClass({
 
         window.addEventListener('keydown', this.handleKeyDown);
         ipcRenderer.on('is-full-screen-reply', this.handleEnterFullScreenMode);
+        setApplicationMenu(this);
+    },
+
+    componentDidUpdate() {
+        setApplicationMenu(this);
     },
 
     handleSwitchCoverScreen() {
@@ -291,9 +303,11 @@ const getReaderComponent = manga => React.createClass({
             type: 'checkbox',
             checked: thisState.readMode === READ_MODE.TRADITION,
             click: () => {
-                that.setState({
-                    readMode: READ_MODE.TRADITION
-                }, that.handleDrawCanvas);
+                if (thisState.readMode === READ_MODE.MORDEN) {
+                    that.setState({
+                        readMode: READ_MODE.TRADITION
+                    }, that.handleDrawCanvas);
+                }
             }
         }));
         menu.append(new MenuItem({
@@ -301,9 +315,11 @@ const getReaderComponent = manga => React.createClass({
             type: 'checkbox',
             checked: thisState.readMode === READ_MODE.MORDEN,
             click: () => {
-                that.setState({
-                    readMode: READ_MODE.MORDEN
-                }, that.handleDrawCanvas);
+                if (thisState.readMode === READ_MODE.TRADITION) {
+                    that.setState({
+                        readMode: READ_MODE.MORDEN
+                    }, that.handleDrawCanvas);
+                }
             }
         }));
 
@@ -321,34 +337,37 @@ const getReaderComponent = manga => React.createClass({
             label: '单页',
             type: 'checkbox',
             checked: thisState.viewMode === VIEW_MODE.SINGLE,
-            click: () => {
-                manga.set({ viewMode: VIEW_MODE.SINGLE });
-                MangaManage.saveConfig();
-                that.setState({ viewMode: VIEW_MODE.SINGLE });
-            }
+            click: this.handleSetSingleViewMode
         }));
         menu.append(new MenuItem({
             label: '双页',
             type: 'checkbox',
             checked: thisState.viewMode === VIEW_MODE.DOUBLE,
-            click: () => {
-                manga.set({
-                    viewMode: VIEW_MODE.DOUBLE,
-                    lastReaded: thisState.pageNum
-                });
-                MangaManage.saveConfig();
-                that.setState({
-                    viewMode: VIEW_MODE.DOUBLE,
-                    pageNum: thisState.pageNum,
-                    canvasStyle: {
-                        width: 0,
-                        height: 0
-                    }
-                }, this.handleDrawCanvas);
-            }
+            click: this.handleSetDoubleViewMode
         }));
 
         menu.popup(remote.getCurrentWindow(), Number(boundingClientRect.left.toFixed(0)), boundingClientRect.top);
+    },
+    handleSetSingleViewMode() {
+        manga.set({ viewMode: VIEW_MODE.SINGLE });
+        MangaManage.saveConfig();
+        this.setState({ viewMode: VIEW_MODE.SINGLE });
+    },
+    handleSetDoubleViewMode() {
+        const thisState = this.state;
+        manga.set({
+            viewMode: VIEW_MODE.DOUBLE,
+            lastReaded: thisState.pageNum
+        });
+        MangaManage.saveConfig();
+        this.setState({
+            viewMode: VIEW_MODE.DOUBLE,
+            pageNum: thisState.pageNum,
+            canvasStyle: {
+                width: 0,
+                height: 0
+            }
+        }, this.handleDrawCanvas);
     },
 
     handleClickPreviousPage() {

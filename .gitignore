@@ -2,3 +2,6 @@ node_modules
 asset
 launch.json
 manga.json
+build-asar.sh
+app.asar
+app

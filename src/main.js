@@ -5,11 +5,10 @@ const fs = require('fs');
 
 const { app, BrowserWindow, ipcMain, dialog } = electron;
 
-electron.crashReporter.start();
-
 let mainWindow, readerWindow;
 let stateCache = false;
 let hashCache = false;
+let isClickClose = true;
 
 const openMainWindow = () => {
     mainWindow = new BrowserWindow({
@@ -20,10 +19,15 @@ const openMainWindow = () => {
         title: 'Manga-Reader'
     });
 
-    mainWindow.webContents.openDevTools();
+    if (process.env.dev === "true")
+        mainWindow.webContents.openDevTools();
     mainWindow.loadURL(`file://${__dirname}/view/html/index.html`);
 
     mainWindow.on('closed', () => {
+        if (isClickClose)
+            app.quit();
+
+        isClickClose = true;
         mainWindow = null;
     });
 }
@@ -38,7 +42,8 @@ const openReaderWindow = () => {
         frame: false
     });
 
-    readerWindow.webContents.openDevTools();
+    if (process.env.dev === "true")
+        readerWindow.webContents.openDevTools();
     readerWindow.loadURL(`file://${__dirname}/view/html/reader.html`);
 
     readerWindow.on('closed', () => {
@@ -95,6 +100,7 @@ ipcMain.on('show-authro-info', () => {
 ipcMain.on('selected-manga', (event, hash, state) => {
     stateCache = state;
     hashCache = hash;
+    isClickClose = false;
     mainWindow.close();
     openReaderWindow();
 });

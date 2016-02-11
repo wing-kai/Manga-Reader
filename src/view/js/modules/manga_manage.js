@@ -166,7 +166,7 @@ const addCategory = name => {
     if (!Categories.some(category => category.id === newCategory.id))
         Categories = Categories.push(newCategory);
 
-    saveConfig();
+    saveConfig(true);
     return Categories.toJS();
 }
 

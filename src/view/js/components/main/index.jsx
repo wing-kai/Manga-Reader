@@ -1,9 +1,10 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const EasyFlux = require('easy-flux' );
-const { remote, ipcRenderer, webFrame } = require('electron');
-const { Menu, MenuItem } = remote;
+const { remote, ipcRenderer, webFrame, shell } = require('electron');
+const { Menu, MenuItem, app } = remote;
 
+const publicMenu = require('../common/application_menu');
 const getAction = require('./action');
 const getStore = require('./store');
 
@@ -11,7 +12,7 @@ const RectangleSelection = require('../rectangle_selection');
 const SideMenu = require('../side_menu');
 const MangaManage = require('../../modules/manga_manage');
 
-const Flux = new EasyFlux({ dev: true });
+const Flux = new EasyFlux({ dev: process.env.dev === "true" });
 const Action = getAction(Flux);
 const Store = getStore(Flux);
 
@@ -25,6 +26,8 @@ const SIDE_BAR = {
     CONFIG: "SIDE_BAR_CONFIG"
 }
 
+require('../common/global');
+
 // disable zoom
 webFrame.setZoomLevelLimits(1, 1);
 
@@ -36,6 +39,12 @@ const BookCase = React.createClass({
             author: "",
             draggable: false,
             rectangleSelected: new Set()
+        }
+    },
+
+    getInitialState() {
+        return {
+            emptyWrap: 0
         }
     },
 
@@ -62,13 +71,17 @@ const BookCase = React.createClass({
             </div>
         ));
 
+        let emptyWrap = [];
+        for (let i = 0; i < this.state.emptyWrap; i++)
+            emptyWrap.push(<div className="manga-wrap empty" key={i} />);
+
         return (
-            <div className="container" onDrop={this.handleDrop} onDragOver={this.handleDragOver}>
+            <div id='book-case' className="container" onDrop={this.handleDrop} onDragOver={this.handleDragOver}>
                 {
                     list.length ? (
                         <div className="book-list">
                             {list}
-                            <div style={{ flex:1 }} />
+                            {emptyWrap}
                         </div>
                     ) : thisProps.category ? null : (
                         <div
@@ -91,6 +104,33 @@ const BookCase = React.createClass({
                 }
             </div>
         )
+    },
+
+    componentDidMount() {
+        const emptyWrap = this.handleGetEmptyWrap();
+        if (this.state.emptyWrap !== emptyWrap)
+            this.setState({ emptyWrap });
+
+        window.addEventListener('resize', this.handleResizeBookCase);
+    },
+
+    componentWillReceiveProps(newProps) {
+        const emptyWrap = this.handleGetEmptyWrap(newProps);
+        if (this.state.emptyWrap !== emptyWrap)
+            this.setState({ emptyWrap });
+    },
+
+    handleResizeBookCase() {
+        const emptyWrap = this.handleGetEmptyWrap();
+        if (this.state.emptyWrap !== emptyWrap)
+            this.setState({ emptyWrap });
+    },
+
+    handleGetEmptyWrap(newProps = false) {
+        const bookCaseWidth = document.getElementById('book-case').getBoundingClientRect().width - 20;
+        const maxCoverCountInRow = Math.trunc(bookCaseWidth/180);
+        const lastRowCount = (newProps ? newProps.list.length : this.props.list.length) % maxCoverCountInRow;
+        return lastRowCount === maxCoverCountInRow ? 0 : maxCoverCountInRow - (newProps ? newProps.list.length : this.props.list.length) % maxCoverCountInRow;
     },
 
     handleDragOver(event) {
@@ -324,6 +364,41 @@ const getMainComponent = stateCache => React.createClass({
         RectangleSelection.setSelectedElementsHandler(this.handlerMarqueenSelected);
         RectangleSelection.setDeselecteAllElementsHandler(this.handleDeselectAll);
         RectangleSelection.startListen();
+
+        const menuTemplate = [{
+                label: 'Manga Reader',
+                submenu: [{
+                    label: '关于 ' + app.getName(),
+                    role: 'about'
+                }, {
+                    label: '导入漫画',
+                    click: this.handleClickExportBtn
+                }, {
+                    type: 'separator'
+                }, {
+                    label: '退出',
+                    accelerator: 'Command+Q',
+                    click: app.quit
+                }]
+            },
+            publicMenu.editMenu,
+            publicMenu.viewMenu,
+            publicMenu.windowMenu,
+            publicMenu.helpMenu
+        ];
+
+        Menu.setApplicationMenu(
+            Menu.buildFromTemplate(menuTemplate)
+        );
+    },
+
+    componentDidUpdate() {
+        RectangleSelection.setSelectbleElements(
+            Array.from(
+                document.getElementsByClassName('manga-wrap')
+            ),
+            'hash'
+        );
     },
 
     handlerMarqueenSelected(hashList) {
@@ -373,13 +448,6 @@ const getMainComponent = stateCache => React.createClass({
         if (btnName === SIDE_BAR.ALL) {
             this.setState({
                 sideBar: SIDE_BAR.ALL
-            }, () => {
-                RectangleSelection.setSelectbleElements(
-                    Array.from(
-                        document.getElementsByClassName('manga-wrap')
-                    ),
-                    'hash'
-                );
             });
         } else if (btnName === SIDE_BAR.AUTHOR) {
             this.setState({
@@ -388,13 +456,6 @@ const getMainComponent = stateCache => React.createClass({
         }  else if (btnName === SIDE_BAR.CATEGORIES) {
             this.setState({
                 sideBar: SIDE_BAR.CATEGORIES
-            }, () => {
-                RectangleSelection.setSelectbleElements(
-                    Array.from(
-                        document.getElementsByClassName('manga-wrap')
-                    ),
-                    'hash'
-                );
             });
         }  else if (thisState.sideBar === SIDE_BAR.EXPORT) {
             this.setState({
@@ -414,13 +475,8 @@ const getMainComponent = stateCache => React.createClass({
     },
 
     handleAddList(name) {
-
-        const that = this;
         const categories = MangaManage.addCategory(name);
-
-        MangaManage.saveConfig().then(() => {
-            that.setState({ categories });
-        });
+        this.setState({ categories });
     },
 
     handleEditList(hash, newName) {

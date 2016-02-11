@@ -9,7 +9,7 @@ const READ_MODE = {
     MORDEN: "READ_MODE_MORDEN"
 }
 
-const CONFIG_PATH = "manga.json";
+const CONFIG_PATH = process.env.dev === 'true' ? "manga.json" : process.env.HOME + "/.manga.json";
 
 const REGEXP = {
     IMAGE_FILE: /^.+(\.png|\.jpg|\.bmp)$/,
