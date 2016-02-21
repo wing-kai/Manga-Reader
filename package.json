@@ -39,7 +39,11 @@
   "dependencies": {
     "crypto": "0.0.3",
     "easy-flux": "^0.2.3",
+    "epub": "^0.1.6",
     "immutable": "^3.7.6",
+    "jszip": "^2.5.0",
+    "node-ensure": "0.0.0",
+    "pdfjs-dist": "^1.4.83",
     "react": "^0.14.7",
     "react-dom": "^0.14.7"
   }
