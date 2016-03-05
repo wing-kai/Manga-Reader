@@ -54,13 +54,27 @@ const fileReader = (path, encode) => new Promise((resolve, reject) => {
 });
 
 const saveConfig = debounce(1000, () => {
-    console.log('saved...');
-    MangaEvent.saved();
-    CategoryEvent.saved();
 
-    // when error
-    // MangaEvent.saveFail();
-    // CategoryEvent.saveFail();
+    const allManga = mangaMap.toObject();
+    for (let key in allManga)
+        allManga[key] = allManga[key].getOriginData();
+
+    const configContent = JSON.stringify({
+        manga: allManga,
+        categories: categoriesList.toList(),
+        prefence: prefenceMap.toObject()
+    });
+
+    fs.writeFile(CONFIG_PATH, configContent, 'utf-8', err => {
+        if (err) {
+            MangaEvent.saveFail();
+            CategoryEvent.saveFail();
+        } else {
+            console.log('saved...');
+            MangaEvent.saved();
+            CategoryEvent.saved();
+        }
+    });
 });
 
 // 获取指定漫画 或 全部漫画
@@ -108,7 +122,7 @@ const createThumbnail = (fileType, hash, errorSet) => {
 }
 
 const initConfigFile = () => {
-    const fileExists = new Promise((resolve, reject) => {
+    const repoExists = new Promise((resolve, reject) => {
         fs.exists(
             REPO_PATH,
             exist => exist
@@ -117,43 +131,43 @@ const initConfigFile = () => {
         );
     });
 
-    return fileExists.then(
-        () => fileReader(CONFIG_PATH, 'utf-8').then(content => {
-            try {
-                const originData = JSON.parse(content);
-
-                if ('manga' in originData) {
-                    Object.keys(originData.manga, hash => {
-                        mangaMap.set(hash, new Manga(originData.manga[hash]));
-                    });
-                }
-                if ('categories' in originData) {
-                    originData.categories.forEach(data => {
-                        categoriesList = categoriesList.push(new Category(data))
-                    });
-                }
-                if ('prefence' in originData) {
-                    prefenceMap = Immutable.Map(originData.prefence);
-                }
-
-                return Promise.resolve(true);
-            } catch(e) {
-                return Promise.reject(e);
-            }
-        }),
-        () => new Promise((resolve, reject) => {
+    return repoExists.catch(
+        err => new Promise((resolve, reject) => {
             fs.mkdir(REPO_PATH, err => {
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                fs.writeFile(CONFIG_PATH, '{"manga":{},"categories":[],"prefence":{}}', 'utf-8', err => {
-                    err ? reject(err) : resolve(true);
-                });
+                resolve()
             });
         })
-    );
+    ).then(
+        () => fileReader(CONFIG_PATH, 'utf-8')
+    ).then(content => {
+        const originData = JSON.parse(content);
+
+        if ('manga' in originData) {
+            for (let hash in originData.manga) {
+                mangaMap = mangaMap.set(hash, new Manga(originData.manga[hash]));
+            }
+        }
+        if ('categories' in originData) {
+            originData.categories.forEach(data => {
+                categoriesList = categoriesList.push(new Category(data))
+            });
+        }
+        if ('prefence' in originData) {
+            prefenceMap = Immutable.Map(originData.prefence);
+        }
+
+        return Promise.resolve(true);
+    }).catch(
+        err => new Promise((resolve, reject) => {
+            fs.writeFile(CONFIG_PATH, '{"manga":{},"categories":[],"prefence":{}}', 'utf-8', err => {
+                err ? reject(err) : resolve(true);
+            })
+        })
+    )
 }
 
 const importManga = files => {
@@ -202,7 +216,7 @@ const importManga = files => {
                     const newManga = new Manga({
                         cover: REPO_PATH + '/' + md5 + '.png',
                         hash: md5,
-                        title: file.name,
+                        title: file.name.replace(/^(.+)\..+$/, "$1"),
                         fileType: file.type,
                         path: REPO_PATH + '/' + md5 + ext
                     });

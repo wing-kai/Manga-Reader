@@ -131,7 +131,7 @@ const Body = React.createClass({
             <div className="home">
                 <Titlebar />
                 <Container>
-                    <SideBar    
+                    <SideBar
                         active={thisState.sideBar}
                         onClick={this.handleClickSidebarBtn}
                         handleSelectedFile={this.handleSelectedFile}

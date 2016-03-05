@@ -201,6 +201,23 @@ class Manga {
         });
     }
 
+    getOriginData() {
+        const thisData = this.data.toObject();
+        return {
+            hash: thisData.hash,
+            path: thisData.path,
+            cover: thisData.cover,
+            fileType: thisData.fileType,
+            title: thisData.title,
+            author: thisData.author,
+            category: Array.from(thisData.category),
+            lastReaded: thisData.lastReaded,
+            viewMode: thisData.viewMode,
+            readMode: thisData.readMode,
+            bookMark: Array.from(thisData.bookMark)
+        }
+    }
+
     removeBookMark(value, sync) {
 
         sync = typeof sync === "boolean" ? sync : false;
