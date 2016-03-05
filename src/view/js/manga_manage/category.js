@@ -1,4 +1,5 @@
-const Immutable = require('immutable');
+const Immutable        = require('immutable');
+const crypto           = require('crypto');
 const { EventEmitter } = require('events');
 
 class CategoryEvent extends EventEmitter {
@@ -40,12 +41,26 @@ class Category {
             manga: new Set()
         });
 
-        this.data = Object.assign(defaultOpt, opt);
+        const args = Object.assign({}, opt);
+
+        if (!('hash' in args))
+            args.hash = crypto.createHash('md5').update(opt.name).digest('hex').slice(0, 8);
+
+        this.data = Object.assign(defaultOpt, args);
         Object.seal(this);
     }
 
     get(key) {
         return this.data[key]
+    }
+
+    getOriginData() {
+        const originData = Object.assign({}, this.data);
+        return {
+            hash: originData.hash,
+            name: originData.name,
+            manga: Array.from(originData.manga)
+        }
     }
 
     rename(newName, sync) {

@@ -36,8 +36,8 @@ const SideBar = React.createClass({
         return (
             <div ref="sideBar" className={"side-bar" + (this.state.blur ? " blur" : "")}>
                 <Btn icon="box" active={active === SIDE_BAR.ALL} onMouseDown={this.handleClickBtn.bind(this, SIDE_BAR.ALL)} />
-                <Btn icon="users" active={active === SIDE_BAR.AUTHOR} onMouseDown={this.handleClickBtn.bind(this, SIDE_BAR.AUTHOR)} />
                 <Btn icon="list" active={active === SIDE_BAR.CATEGORIES} onMouseDown={this.handleClickBtn.bind(this, SIDE_BAR.CATEGORIES)} />
+                <Btn icon="users" active={active === SIDE_BAR.AUTHOR} onMouseDown={this.handleClickBtn.bind(this, SIDE_BAR.AUTHOR)} />
                 <div style={{flex:1}} />
                 <Btn icon="plus" active={active === SIDE_BAR.EXPORT} onClick={this.handleSelectedFile} />
                 <Btn icon="cog" active={active === SIDE_BAR.CONFIG} />
