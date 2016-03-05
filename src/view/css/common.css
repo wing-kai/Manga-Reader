@@ -2,6 +2,7 @@
     outline: none;
     cursor: default;
     font-family: 'Segoe WPC', 'Segoe UI', SFUIText-Light, HelveticaNeue-Light, sans-serif, 'Droid Sans Fallback';
+    -webkit-user-select: none;
 }
 html, body, .body {
     padding: 0;

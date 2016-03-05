@@ -61,7 +61,7 @@ class Manga {
 
         return clone(this.data);
     }
-    
+
     getPageFile() {
         const thisData = this.data;
         const list = fs.readdirSync(thisData.path).filter(

@@ -10,7 +10,8 @@ const rename = require('gulp-rename'); //重命名
 const onError = function (err) {
     notify.onError({
         title: "编译出错",
-        message: err.message.replace(/.+\/(.+\.(jsx|js).+)/g, '$1'),
+        // message: err.message.replace(/.+\/(.+\.(jsx|js).+)/g, '$1'),
+        message: err.message,
         sound: "Beep"
     })(err);
 };
@@ -43,7 +44,13 @@ gulp.task('script', function () {
     gulp.src(PATH.SCRIPT).pipe(plumber({
         errorHandler: onError
     })).pipe(babel({
-        compact: false
+        compact: false,
+        presets: ["react"],
+        plugins: [
+            "transform-es2015-destructuring",
+            "transform-es2015-spread",
+            "transform-strict-mode"
+        ]
     })).pipe(plumber({
         errorHandler: onError
     })).pipe(rename({

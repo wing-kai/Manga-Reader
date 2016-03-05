@@ -1,0 +1,19 @@
+.side-bar {
+    flex-basis: 50px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 0;
+}
+
+.side-bar button {
+    font-size: 16px;
+    flex-basis: 36px;
+    width: 100%;
+    border: none;
+    background: none;
+}
+
+.side-bar button:disabled {
+    cursor: not-allowed;
+}

@@ -21,7 +21,39 @@ const FILE_TYPE = {
     EPUB: "application/epub+zip",
 }
 
-const saveConfig = () => {
+const debounce = (wait, func) => {
+    let a = true;
+    let b = false;
+    let timeoutId;
+
+    return immediate => {
+        if (a || immediate) {
+            timeoutId && clearTimeout(timeoutId);
+            func();
+            a = false;
+            timeoutId = setTimeout(() => {
+                b && func();
+                timeoutId = undefined;
+                a = true;
+                b = false;
+            }, wait);
+        } else {
+            b = true;
+        }
+    }
+}
+
+const fileReader = (path, encode) => new Promise((resolve, reject) => {
+    fs.readFile(path, encode, (err, bin) => {
+        if (err) {
+            reject(err);
+            return;
+        }
+        resolve(bin);
+    });
+});
+
+const saveConfig = debounce(1000, () => {
     console.log('saved...');
     MangaEvent.saved();
     CategoryEvent.saved();
@@ -29,7 +61,7 @@ const saveConfig = () => {
     // when error
     // MangaEvent.saveFail();
     // CategoryEvent.saveFail();
-}
+});
 
 // 获取指定漫画 或 全部漫画
 const getManga = hash => {
@@ -38,7 +70,7 @@ const getManga = hash => {
     }
 
     const map = mangaMap.toJS();
-    return Object.keys(map, hash => map[hash]);
+    return Object.keys(map).map(hash => map[hash]) || [];
 }
 
 // 获取所有分类 或 分类下所有漫画
@@ -85,35 +117,29 @@ const initConfigFile = () => {
         );
     });
 
-    fileExists.then(
-        () => new Promise((resolve, reject) => {
-            fs.readFile(CONFIG_PATH, 'utf-8', (err, content) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                try {
-                    const originData = JSON.parse(content);
+    return fileExists.then(
+        () => fileReader(CONFIG_PATH, 'utf-8').then(content => {
+            try {
+                const originData = JSON.parse(content);
 
-                    if ('manga' in originData) {
-                        Object.keys(originData.manga, hash => {
-                            mangaMap.set(hash, new Manga(originData.manga[hash]));
-                        });
-                    }
-                    if ('categories' in originData) {
-                        originData.categories.forEach(data => {
-                            categoriesList = categoriesList.push(new Category(data))
-                        });
-                    }
-                    if ('prefence' in originData) {
-                        prefenceMap = Immutable.Map(originData.prefence);
-                    }
-
-                    resolve(true);
-                } catch(e) {
-                    reject(e);
+                if ('manga' in originData) {
+                    Object.keys(originData.manga, hash => {
+                        mangaMap.set(hash, new Manga(originData.manga[hash]));
+                    });
                 }
-            });
+                if ('categories' in originData) {
+                    originData.categories.forEach(data => {
+                        categoriesList = categoriesList.push(new Category(data))
+                    });
+                }
+                if ('prefence' in originData) {
+                    prefenceMap = Immutable.Map(originData.prefence);
+                }
+
+                return Promise.resolve(true);
+            } catch(e) {
+                return Promise.reject(e);
+            }
         }),
         () => new Promise((resolve, reject) => {
             fs.mkdir(REPO_PATH, err => {
@@ -136,8 +162,7 @@ const importManga = files => {
     let promiseList = [];
     files.forEach(file => {
 
-        const md5Title = crypto.createHash('md5').update(file.name).digest('hex').slice(0, 8);
-        let ext;
+        let ext, md5;
 
         switch(file.type) {
             case FILE_TYPE.ZIP:  ext = ".zip";  break;
@@ -146,40 +171,55 @@ const importManga = files => {
             default: throw TypeError("File Type Not Support:" + file.type);
         }
 
-        const promise = (new Promise(resolve => {
+        const getMD5 = fileReader(file.path, 'binary').then(
+            bin => crypto.createHash('md5').update(bin).digest('hex').slice(0, 8)
+        );
+
+        const promise = getMD5.then(md5 => {
+            if (getManga(md5))
+                return;
 
             const rs = fs.createReadStream(file.path);
-            const ws = fs.createWriteStream(REPO_PATH + '/' + md5Title + ext);
-            
-            rs.on('end', () => {
-                resolve(md5Title);
-            });
-            rs.on('error', err => {
-                errorSet.add(md5Title);
-                resolve(md5Title);
-            });
+            const ws = fs.createWriteStream(REPO_PATH + '/' + md5 + ext);
+
+            const copyPromise = new Promise(resolve => {
+                rs.on('end', () => {
+                    resolve(md5);
+                });
+                rs.on('error', err => {
+                    errorSet.add(md5);
+                    resolve(md5);
+                });
+            })
 
             rs.pipe(ws);
-        })).then(
-            createThumbnail.bind(this, file.type, md5Title, errorSet)
-        ).then(md5Title => {
-            if (errorSet.has(md5Title)) {
-                return null;
-            } else {
-                return new Manga({
-                    hash: md5Title,
-                    title: file.name,
-                    fileType: file.type,
-                    path: REPO_PATH + '/' + md5Title + ext
-                });
-            }
+
+            return copyPromise.then(() => createThumbnail(file.type, md5, errorSet)).then(md5 => {
+                if (errorSet.has(md5)) {
+                    return;
+                } else {
+
+                    const newManga = new Manga({
+                        cover: REPO_PATH + '/' + md5 + '.png',
+                        hash: md5,
+                        title: file.name,
+                        fileType: file.type,
+                        path: REPO_PATH + '/' + md5 + ext
+                    });
+
+                    mangaMap = mangaMap.set(md5, newManga);
+
+                    return newManga;
+                }
+            });
         });
 
         promiseList.push(promise);
     });
 
-    Promise.all(promiseList).then(newMangaList => {
-        console.log(newMangaList);
+    return Promise.all(promiseList).then(newMangaList => {
+        saveConfig();
+        return newMangaList;
     });
 }
 
@@ -189,5 +229,6 @@ CategoryEvent.listenSaveRequest(saveConfig);
 module.exports = {
     saveConfig,
     importManga,
-    initConfigFile
+    initConfigFile,
+    getManga
 }

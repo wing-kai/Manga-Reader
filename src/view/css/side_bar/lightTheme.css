@@ -1,0 +1,20 @@
+@import url(./common.css);
+
+.side-bar {
+    background: rgba(236, 236, 236, 1);
+    color: rgba(47, 47, 47, 1);
+    border-right: solid 1px rgba(217, 217, 217, 1);
+}
+
+.side-bar button {
+    color: rgba(47, 47, 47, 1);
+}
+
+.side-bar:not(.blur) button.active:not(:disabled) {
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(16, 108, 214, 1)
+}
+
+.side-bar.blur button.active:not(:disabled) {
+    background-color: rgba(200, 200, 200, 1)
+}

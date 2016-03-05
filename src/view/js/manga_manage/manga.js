@@ -37,6 +37,7 @@ class Manga {
         let defaultOpt = Object.seal({
             hash:       "",        // ID
             path:       "",        // 路径
+            cover:      "",        // 封面文件
             fileType:   "",        // 文件类型（zip, epub, pdf）
             title:      "",        // 标题
             author:     "",        // 作者
@@ -52,7 +53,7 @@ class Manga {
     }
 
     get(key) {
-        return this.get(key);
+        return this.data.get(key);
     }
 
     setTitle(value, sync) {

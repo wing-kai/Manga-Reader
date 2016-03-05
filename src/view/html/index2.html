@@ -1,0 +1,109 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../../../node_modules/react-titlebar/style.css">
+    <link rel="stylesheet" href="../css/iconfont.css" />
+    <link rel="stylesheet" href="../css/side_bar/lightTheme.css">
+    <link rel="stylesheet" href="../css/side_menu/lightTheme.css">
+    <style>
+    .home {
+        display: flex;
+        height: 100%;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .container {
+        display: flex;
+        flex: 1;
+    }
+
+    .book-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        overflow: scroll;
+        padding: 10px 30px;
+        background-color: #fafafa;
+        flex: 1;
+    }
+
+    .empty-tips {
+        text-align: center;
+        color: #fff;
+        border: dashed 2px #fff;
+        border-radius: 5px;
+        padding: 20px;
+        margin-top: 50px;
+        text-decoration: none;
+    }
+
+    .manga-wrap {
+        height: 260px;
+        width: 160px;
+        margin: 10px;
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .book-list.hide-info .manga-wrap {
+        height: 210px;
+        justify-content: center;
+    }
+
+    .manga-wrap img {
+        object-fit: contain;
+        background-color: #fff;
+        border: none;
+        box-shadow: 0 1px 3px 0 #aaa;
+    }
+
+    .manga-wrap label {
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .manga-wrap small {
+        color: rgba(124,124,124,1);
+    }
+
+    .book-list.hide-info .manga-wrap label,
+    .book-list.hide-info .manga-wrap small {
+        display: none;
+    }
+
+    .manga-wrap.selected img {
+        box-shadow: 0 0 0 2px #00BCFF;
+    }
+
+    .manga-wrap.empty {
+        visibility: hidden;
+    }
+    </style>
+</head>
+<body>
+    <!-- <input type="file" id="ctrl" multiple accept="application/pdf,application/epub+zip,application/zip"/> -->
+    <div id="body"></div>
+    <script>
+    require('../js/main');
+    // const mm = require('../js/manga_manage');
+    // mm.initConfigFile();
+    // document.querySelector('input').onchange = function(event) {
+    //     mm.importManga(Array.from(this.files));
+    // }
+
+    // document.querySelector('div').ondragover = function(event) {
+    //     event.preventDefault();
+    // }
+
+    // document.querySelector('div').ondrop = function(event) {
+    //     event.preventDefault();
+    //     console.log(Array.from(event.dataTransfer.files));
+    // }
+    </script>
+</body>
+</html>
