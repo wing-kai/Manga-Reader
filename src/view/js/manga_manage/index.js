@@ -94,7 +94,7 @@ const getManga = hash => {
 const getCategory = hash => {
     if (hash) {
         let mangaList;
-        const foundCategory = categoriesList.toJS().filter(category => {
+        const foundCategory = categoriesList.toJS().some(category => {
             mangaList = category.get('manga');
             return category.get('hash') === hash;
         });
@@ -114,7 +114,7 @@ const addCategory = name => {
 const getAuthor = name => (
     name && (name in authorMap.toObject())
     ? authorMap.get(name).map(hash => getManga(hash))
-    : authorMap.toObject()
+    : Object.keys(authorMap.toObject())
 );
 
 const setAuthor = (author, hash) => {

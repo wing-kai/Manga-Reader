@@ -25,7 +25,7 @@ const SideMenu = React.createClass({
             list: [],
             selectItem: hash => {},
             selectedItem: '',
-            addItem: newItem => {}
+            addItem: false
         }
     },
     getInitialState() {
@@ -45,7 +45,8 @@ const SideMenu = React.createClass({
             editable,
             list,
             selectItem,
-            selected
+            selected,
+            addItem
         } = this.props;
 
         return (
@@ -61,8 +62,7 @@ const SideMenu = React.createClass({
                 <li className="add-list" onClick={this.handleClickAddItem}>
                     <div>
                     {
-                        thisState.add
-                        ? (
+                        addItem && (thisState.add ? (
                             <input
                                 ref="newItem"
                                 type="text"
@@ -72,7 +72,7 @@ const SideMenu = React.createClass({
                                     this.handleKeyPress.bind(this, this.handleBlurAddItemInput)
                                 }
                             />
-                        ) : '新建'
+                        ) : '新建')
                     }
                     </div>
                 </li>
@@ -189,7 +189,7 @@ const Body = React.createClass({
                     />
                     {
                         sideBar !== SIDE_BAR.ALL
-                        ? <SideMenu list={sideMenuList} addItem={this.handleAddItem} selectItem={this.handleSelectItem} selected={selectedItem} />
+                        ? <SideMenu list={sideMenuList} addItem={sideBar === SIDE_BAR.CATEGORIES ? this.handleAddItem : false} selectItem={this.handleSelectItem} selected={selectedItem} />
                         : null
                     }
                     <Bookcase list={bookcaseList} />
